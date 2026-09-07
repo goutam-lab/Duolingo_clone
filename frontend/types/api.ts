@@ -125,3 +125,80 @@ export interface HeartRefillResponse {
   max_hearts: number;
   message: string;
 }
+
+export type ExerciseType =
+  | "multiple_choice"
+  | "translate"
+  | "word_bank"
+  | "match_pairs"
+  | "fill_blank"
+  | "type_answer";
+
+export interface ExercisePublic {
+  id: number;
+  type: ExerciseType;
+  prompt: string;
+  question_data: any;
+  order_index: number;
+}
+
+export interface LessonDetailResponse {
+  id: number;
+  title: string;
+  order_index: number;
+  xp_reward: number;
+  estimated_seconds: number;
+  skill_id: number;
+  skill_title?: string | null;
+  exercises: ExercisePublic[];
+}
+
+export interface LessonAttemptStartResponse {
+  attempt_id: number;
+  lesson_id: number;
+  started_at: string;
+  hearts_remaining: number;
+}
+
+export interface ExerciseAnswerRequest {
+  exercise_id: number;
+  answer: any;
+}
+
+export interface ExerciseAnswerResponse {
+  is_correct: boolean;
+  feedback: string;
+  hearts_remaining: number;
+  exercise_completed: boolean;
+  correct_answer?: any;
+}
+
+export interface LessonCompleteSkillSummary {
+  lessons_completed: number;
+  total_lessons: number;
+  crown_level: number;
+}
+
+export interface LessonCompleteStreakSummary {
+  current: number;
+  longest: number;
+}
+
+export interface LessonCompleteDailyGoalSummary {
+  progress: number;
+  goal: number;
+  completed: boolean;
+}
+
+export interface LessonCompleteResponse {
+  completed: boolean;
+  xp_earned: number;
+  total_xp: number;
+  score: number;
+  hearts_remaining: number;
+  skill_progress: LessonCompleteSkillSummary;
+  streak: LessonCompleteStreakSummary;
+  daily_goal: LessonCompleteDailyGoalSummary;
+  new_achievements: string[];
+}
+

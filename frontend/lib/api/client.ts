@@ -8,6 +8,11 @@ import {
   UserSignupRequest,
   UserLoginRequest,
   OnboardingRequest,
+  LessonDetailResponse,
+  LessonAttemptStartResponse,
+  ExerciseAnswerRequest,
+  ExerciseAnswerResponse,
+  LessonCompleteResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -172,6 +177,54 @@ class ApiClient {
     return this.request<HeartRefillResponse>("/me/refill-hearts", {
       method: "POST",
     });
+  }
+
+  /**
+   * Fetch lesson metadata and safe exercises (without authoritative answers).
+   */
+  async getLesson(lessonId: number): Promise<LessonDetailResponse> {
+    return this.request<LessonDetailResponse>(`/lessons/${lessonId}`);
+  }
+
+  /**
+   * Start a new authoritative lesson attempt.
+   */
+  async startLessonAttempt(lessonId: number): Promise<LessonAttemptStartResponse> {
+    return this.request<LessonAttemptStartResponse>(`/lessons/${lessonId}/attempts`, {
+      method: "POST",
+    });
+  }
+
+  /**
+   * Submit an exercise answer for server validation.
+   */
+  async submitExerciseAnswer(
+    lessonId: number,
+    attemptId: number,
+    payload: ExerciseAnswerRequest
+  ): Promise<ExerciseAnswerResponse> {
+    return this.request<ExerciseAnswerResponse>(
+      `/lessons/${lessonId}/attempts/${attemptId}/answers`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    );
+  }
+
+  /**
+   * Finalize a completed lesson attempt.
+   */
+  async completeLesson(
+    lessonId: number,
+    attemptId: number
+  ): Promise<LessonCompleteResponse> {
+    return this.request<LessonCompleteResponse>(
+      `/lessons/${lessonId}/attempts/${attemptId}/complete`,
+      {
+        method: "POST",
+      }
+    );
   }
 }
 
