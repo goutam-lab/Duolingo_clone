@@ -13,6 +13,10 @@ import {
   ExerciseAnswerRequest,
   ExerciseAnswerResponse,
   LessonCompleteResponse,
+  LeaderboardResponse,
+  UserProfileResponse,
+  AchievementPublic,
+  UserAchievementPublic,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -225,6 +229,41 @@ class ApiClient {
         method: "POST",
       }
     );
+  }
+
+  /**
+   * Fetch XP rankings for leaderboard.
+   */
+  async getLeaderboard(limit: number = 100): Promise<LeaderboardResponse> {
+    return this.request<LeaderboardResponse>(`/leaderboard?limit=${limit}`);
+  }
+
+  /**
+   * Fetch authenticated user's profile and stats.
+   */
+  async getMyProfile(): Promise<UserProfileResponse> {
+    return this.request<UserProfileResponse>("/profile/me");
+  }
+
+  /**
+   * Fetch public profile and stats for a specific user.
+   */
+  async getUserProfile(userId: number): Promise<UserProfileResponse> {
+    return this.request<UserProfileResponse>(`/profile/${userId}`);
+  }
+
+  /**
+   * Fetch all achievement definitions in catalog.
+   */
+  async getAchievements(): Promise<AchievementPublic[]> {
+    return this.request<AchievementPublic[]>("/achievements");
+  }
+
+  /**
+   * Fetch achievements unlocked by the current authenticated user.
+   */
+  async getUserAchievements(): Promise<UserAchievementPublic[]> {
+    return this.request<UserAchievementPublic[]>("/me/achievements");
   }
 }
 

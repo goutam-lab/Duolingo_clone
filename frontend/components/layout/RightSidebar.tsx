@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Sparkles, Shield, Trophy } from "lucide-react";
 import { UserMeResponse } from "@/types/api";
 import { DailyGoalCard } from "@/components/gamification/DailyGoalCard";
@@ -32,21 +33,24 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ user }) => {
           Unlimited hearts, personalized practice, and zero interruptions!
         </p>
 
-        <button
-          type="button"
-          className="w-full py-3 px-4 rounded-2xl bg-[#1cb0f6] border-b-[4px] border-[#1899d6] hover:bg-[#28b6fa] active:translate-y-0.5 active:border-b-[2px] font-black text-xs uppercase tracking-wider text-white shadow-md shadow-[#1cb0f6]/20 transition-all"
+        <Link
+          href="/shop"
+          className="block text-center w-full py-3 px-4 rounded-2xl bg-[#1cb0f6] border-b-[4px] border-[#1899d6] hover:bg-[#28b6fa] active:translate-y-0.5 active:border-b-[2px] font-black text-xs uppercase tracking-wider text-white shadow-md shadow-[#1cb0f6]/20 transition-all cursor-pointer"
         >
-          Try 1 Week Free
-        </button>
+          View in Shop
+        </Link>
       </div>
 
       {/* Unlock Leaderboards Widget */}
-      <div className="p-4 rounded-2xl border-2 border-[#2b3d48] bg-[#1a2c35] text-white">
+      <Link
+        href="/leaderboard"
+        className="block p-4 rounded-2xl border-2 border-[#2b3d48] bg-[#1a2c35] hover:border-[#ffc800]/50 hover:bg-[#1e343f] transition-all text-white cursor-pointer group"
+      >
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-extrabold text-sm uppercase tracking-wider text-slate-300">
+          <h3 className="font-extrabold text-sm uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors">
             Leaderboard
           </h3>
-          <Trophy className="w-4 h-4 text-[#ffc800]" />
+          <Trophy className="w-4 h-4 text-[#ffc800] group-hover:scale-110 transition-transform" />
         </div>
 
         <div className="flex items-center gap-3">
@@ -62,7 +66,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ user }) => {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Daily Quests / Goal Tracker */}
       <DailyGoalCard progress={dailyGoalProgress} goal={dailyGoalXp} />

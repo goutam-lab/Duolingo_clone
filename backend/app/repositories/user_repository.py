@@ -1,6 +1,6 @@
 from typing import Optional, List, Tuple
 from sqlalchemy import select, func
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from app.models.user import User
 from app.models.user_stats import UserStats
 from app.models.lesson_progress import LessonProgress
@@ -11,8 +11,8 @@ from app.models.achievement import Achievement
 
 class UserRepository:
     def get_user_with_stats(self, db: Session, user_id: int) -> Optional[User]:
-        """Fetch user joined with user_stats."""
-        stmt = select(User).where(User.id == user_id).options(selectinload(User.stats))
+        """Fetch user joined with user_stats in a single joined query."""
+        stmt = select(User).where(User.id == user_id).options(joinedload(User.stats))
         return db.execute(stmt).scalar_one_or_none()
 
     def get_leaderboard(

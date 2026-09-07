@@ -19,16 +19,16 @@ def get_current_user(
     """
     token: Optional[str] = None
 
-    # 1. Check HttpOnly cookie
-    if "access_token" in request.cookies:
-        token = request.cookies["access_token"]
-    # 2. Check Authorization header
-    elif authorization:
+    # 1. Check Authorization header first (explicit client token takes precedence)
+    if authorization:
         parts = authorization.split()
         if len(parts) == 2 and parts[0].lower() == "bearer":
             token = parts[1]
         elif len(parts) == 1:
             token = parts[0]
+    # 2. Fallback to HttpOnly cookie
+    elif "access_token" in request.cookies:
+        token = request.cookies["access_token"]
 
     if not token:
         raise HTTPException(

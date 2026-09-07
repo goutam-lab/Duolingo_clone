@@ -202,3 +202,62 @@ export interface LessonCompleteResponse {
   new_achievements: string[];
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  user_id: number;
+  username: string;
+  avatar_key: string;
+  total_xp: number;
+  xp: number;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+  total_count: number;
+}
+
+export interface ProfileStats {
+  total_xp: number;
+  current_streak: number;
+  longest_streak: number;
+  completed_lessons: number;
+  completed_skills: number;
+}
+
+export interface ProfileAchievement {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  icon_key: string;
+  unlocked_at?: string | null;
+  is_unlocked: boolean;
+}
+
+export interface UserProfileResponse {
+  id: number;
+  username: string;
+  avatar_key?: string | null;
+  created_at: string;
+  stats: ProfileStats;
+  achievements: ProfileAchievement[];
+}
+
+export interface AchievementPublic {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  icon_key: string;
+}
+
+export interface UserAchievementPublic {
+  id: number;
+  achievement_id: number;
+  code: string;
+  title: string;
+  description: string;
+  icon_key: string;
+  unlocked_at: string;
+}
+

@@ -25,3 +25,55 @@ class LessonDetailResponse(BaseModel):
     skill_id: int
     skill_title: Optional[str] = None
     exercises: List[ExercisePublic]
+
+
+class LessonAttemptStartResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    attempt_id: int
+    lesson_id: int
+    started_at: str
+    hearts_remaining: int
+
+
+class ExerciseAnswerRequest(BaseModel):
+    exercise_id: int
+    answer: Any
+
+
+class ExerciseAnswerResponse(BaseModel):
+    is_correct: bool
+    feedback: str
+    hearts_remaining: int
+    exercise_completed: bool
+    correct_answer: Optional[Any] = None
+
+
+class LessonCompleteSkillSummary(BaseModel):
+    lessons_completed: int
+    total_lessons: int
+    crown_level: int
+
+
+class LessonCompleteStreakSummary(BaseModel):
+    current: int
+    longest: int
+
+
+class LessonCompleteDailyGoalSummary(BaseModel):
+    progress: int
+    goal: int
+    completed: bool
+
+
+class LessonCompleteResponse(BaseModel):
+    completed: bool
+    xp_earned: int
+    total_xp: int
+    score: int
+    hearts_remaining: int
+    skill_progress: LessonCompleteSkillSummary
+    streak: LessonCompleteStreakSummary
+    daily_goal: LessonCompleteDailyGoalSummary
+    new_achievements: List[str] = []
+

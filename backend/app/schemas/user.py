@@ -52,7 +52,8 @@ class ProfileAchievement(BaseModel):
     title: str
     description: str
     icon_key: str
-    unlocked_at: datetime
+    unlocked_at: Optional[datetime] = None
+    is_unlocked: bool = True
 
 
 class UserProfileResponse(BaseModel):

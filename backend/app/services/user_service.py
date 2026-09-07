@@ -134,17 +134,39 @@ class UserService:
             completed_skills=aggregates["completed_skills"],
         )
 
-        achievements = [
-            ProfileAchievement(
-                id=a["id"],
-                code=a["code"],
-                title=a["title"],
-                description=a["description"],
-                icon_key=a["icon_key"],
-                unlocked_at=a["unlocked_at"],
-            )
-            for a in aggregates["achievements"]
-        ]
+        # Fetch all achievements catalog to include both unlocked and locked badges
+        from app.models.achievement import Achievement
+        from sqlalchemy import select
+        all_catalog = db.execute(select(Achievement).order_by(Achievement.id.asc())).scalars().all()
+        unlocked_by_code = {a["code"]: a for a in aggregates["achievements"]}
+
+        achievements = []
+        for ach in all_catalog:
+            if ach.code in unlocked_by_code:
+                u = unlocked_by_code[ach.code]
+                achievements.append(
+                    ProfileAchievement(
+                        id=u["id"],
+                        code=u["code"],
+                        title=u["title"],
+                        description=u["description"],
+                        icon_key=u["icon_key"],
+                        unlocked_at=u["unlocked_at"],
+                        is_unlocked=True,
+                    )
+                )
+            else:
+                achievements.append(
+                    ProfileAchievement(
+                        id=ach.id,
+                        code=ach.code,
+                        title=ach.title,
+                        description=ach.description,
+                        icon_key=ach.icon_key,
+                        unlocked_at=None,
+                        is_unlocked=False,
+                    )
+                )
 
         return UserProfileResponse(
             id=user.id,

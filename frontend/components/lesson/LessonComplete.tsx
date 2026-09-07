@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Target, Flame, Trophy, Award, CheckCircle2 } from "lucide-react";
 import { LessonCompleteResponse } from "@/types/api";
+import { AchievementUnlockModal } from "@/components/gamification/AchievementUnlockModal";
 
 interface LessonCompleteProps {
   data: LessonCompleteResponse;
@@ -11,6 +12,9 @@ interface LessonCompleteProps {
 
 export const LessonComplete: React.FC<LessonCompleteProps> = ({ data }) => {
   const router = useRouter();
+  const [showAchievementModal, setShowAchievementModal] = useState<boolean>(
+    Boolean(data.new_achievements && data.new_achievements.length > 0)
+  );
 
   const handleContinue = () => {
     router.push("/");
@@ -130,6 +134,15 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({ data }) => {
           Continue
         </button>
       </div>
+
+      {/* Achievement Celebratory Modal */}
+      {data.new_achievements && data.new_achievements.length > 0 && (
+        <AchievementUnlockModal
+          isOpen={showAchievementModal}
+          onClose={() => setShowAchievementModal(false)}
+          achievementCodes={data.new_achievements}
+        />
+      )}
     </div>
   );
 };
