@@ -1,0 +1,69 @@
+from datetime import datetime, date
+from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
+
+
+class UserStatsPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    total_xp: int
+    current_streak: int
+    longest_streak: int
+    hearts: int
+    max_hearts: int
+    gems: int
+    daily_goal_xp: int
+    daily_goal_progress: int
+    last_activity_date: Optional[date] = None
+
+
+class UserMeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    email: str
+    avatar_key: Optional[str] = "default"
+    total_xp: int
+    current_streak: int
+    longest_streak: int
+    hearts: int
+    max_hearts: int
+    gems: int
+    daily_goal_xp: int
+    daily_goal_progress: int
+    stats: UserStatsPublic
+
+
+class ProfileStats(BaseModel):
+    total_xp: int
+    current_streak: int
+    longest_streak: int
+    completed_lessons: int
+    completed_skills: int
+
+
+class ProfileAchievement(BaseModel):
+    id: int
+    code: str
+    title: str
+    description: str
+    icon_key: str
+    unlocked_at: datetime
+
+
+class UserProfileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    avatar_key: Optional[str] = "default"
+    created_at: datetime
+    stats: ProfileStats
+    achievements: List[ProfileAchievement] = []
+
+
+class HeartRefillResponse(BaseModel):
+    hearts: int
+    max_hearts: int
+    message: str = "Hearts refilled successfully"
