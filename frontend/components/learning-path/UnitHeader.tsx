@@ -14,7 +14,7 @@ export const UnitHeader: React.FC<UnitHeaderProps> = ({
   sectionNumber = 1,
 }) => {
   return (
-    <header className="sticky top-[49px] lg:top-0 z-20 w-full rounded-2xl bg-[#58cc02] border-b-4 border-[#46a302] px-4 py-3 text-white shadow-[0_8px_16px_rgba(19,31,36,0.45)]">
+    <header className="w-full rounded-2xl bg-[#58cc02] border-b-4 border-[#46a302] px-4 py-3 sm:px-5 sm:py-4 text-white shadow-[0_8px_16px_rgba(19,31,36,0.45)]">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-0.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/85">
@@ -26,6 +26,11 @@ export const UnitHeader: React.FC<UnitHeaderProps> = ({
           <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5 truncate">
             {unit.title}
           </h2>
+          {unit.description && (
+            <p className="text-xs sm:text-sm text-white/85 mt-1 leading-snug line-clamp-2">
+              {unit.description}
+            </p>
+          )}
         </div>
 
         <button

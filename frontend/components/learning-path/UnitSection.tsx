@@ -12,71 +12,103 @@ interface UnitSectionProps {
   onSkillClick: (skill: SkillPathResponse) => void;
   firstAvailableSkillId?: number | null;
   sectionNumber?: number;
+  showHeader?: boolean;
 }
 
-const HORIZONTAL_OFFSETS = [0, -40, -64, -40, 0, 40, 64, 40];
+const NODE_Y_OFFSETS = [0, 0, 0, 0, 0, 0, 0, 0];
 
-export const UnitSection: React.FC<UnitSectionProps> = ({
-  unit,
-  onSkillClick,
-  firstAvailableSkillId,
-  sectionNumber = 1,
-}) => {
-  const skills = unit.skills || [];
-  const isCurrentUnit = skills.some((skill) => skill.id === firstAvailableSkillId);
+export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
+  function UnitSection(
+    {
+      unit,
+      onSkillClick,
+      firstAvailableSkillId,
+      sectionNumber = 1,
+      showHeader = true,
+    },
+    ref
+  ) {
+    const skills = unit.skills || [];
+    const isCurrentUnit = skills.some(
+      (skill) => skill.id === firstAvailableSkillId
+    );
 
-  return (
-    <section
-      data-current-unit={isCurrentUnit ? "true" : "false"}
-      className="w-full max-w-[598px] mx-auto flex flex-col items-center relative"
-      aria-label={`Unit ${unit.order_index}: ${unit.title}`}
-    >
-      <UnitHeader unit={unit} sectionNumber={sectionNumber} />
+    return (
+      <section
+        ref={ref as React.RefObject<HTMLElement>}
+        data-unit-id={unit.id}
+        data-current-unit={isCurrentUnit ? "true" : "false"}
+        className="w-full max-w-[598px] mx-auto flex flex-col items-center relative"
+        aria-label={`Unit ${unit.order_index}: ${unit.title}`}
+      >
+        {showHeader && <UnitHeader unit={unit} sectionNumber={sectionNumber} />}
 
-      <div className="w-full flex flex-col items-center relative pt-8 pb-6 overflow-x-hidden">
-        {skills.map((skill, index) => {
-          const currentX = HORIZONTAL_OFFSETS[index % HORIZONTAL_OFFSETS.length];
-          const hasNext = index < skills.length - 1;
-          const nextX = hasNext
-            ? HORIZONTAL_OFFSETS[(index + 1) % HORIZONTAL_OFFSETS.length]
-            : 0;
-          const isFirstAvailable = skill.id === firstAvailableSkillId;
-          const mascotOnRight = currentX <= 0;
+        <div
+          className={`w-full flex flex-col items-center relative overflow-x-hidden ${
+            showHeader ? "pt-10 pb-6" : "pt-6 pb-14"
+          }`}
+        >
+          {!showHeader && unit.order_index > 1 && (
+            <div
+              className="w-full flex items-center gap-3 mb-10 opacity-70"
+              aria-hidden="true"
+            >
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#37464f] to-[#37464f]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#6b7c86] px-2">
+                Section {sectionNumber} · Unit {unit.order_index}
+              </span>
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#37464f] to-[#37464f]" />
+            </div>
+          )}
 
-          return (
-            <React.Fragment key={skill.id}>
-              <div className="relative flex justify-center w-full">
-                <div style={{ transform: `translateX(${currentX}px)` }}>
-                  <SkillNode
-                    skill={skill}
-                    onClick={onSkillClick}
-                    isFirstAvailable={isFirstAvailable}
-                  />
+          {skills.map((skill, index) => {
+            const currentX = 0;
+            const hasNext = index < skills.length - 1;
+            const nextX = 0;
+            const isFirstAvailable = skill.id === firstAvailableSkillId;
+            const mascotOnRight = (index % 2 === 0);
+
+            return (
+              <React.Fragment key={skill.id}>
+                <div className="relative flex justify-center w-full z-10">
+                  <div className="flex flex-col items-center">
+                    <SkillNode
+                      skill={skill}
+                      onClick={onSkillClick}
+                      isFirstAvailable={isFirstAvailable}
+                      showLabel
+                    />
+                  </div>
+
+                  {isFirstAvailable && (
+                    <div
+                      className={`absolute hidden sm:block pointer-events-none ${
+                        mascotOnRight
+                          ? "left-[calc(50%+76px)]"
+                          : "right-[calc(50%+76px)]"
+                      }`}
+                      style={{ top: "32px" }}
+                    >
+                      <Mascot />
+                    </div>
+                  )}
                 </div>
 
-                {isFirstAvailable && (
-                  <div
-                    className={`absolute top-8 hidden sm:block pointer-events-none ${
-                      mascotOnRight ? "left-[calc(50%+78px)]" : "right-[calc(50%+78px)]"
-                    }`}
-                  >
-                    <Mascot />
+                {hasNext && (
+                  <div className="relative w-full flex justify-center z-0">
+                    <PathConnector
+                      startX={currentX}
+                      endX={nextX}
+                      height={52}
+                      isCompleted={skill.status === "completed"}
+                    />
                   </div>
                 )}
-              </div>
-
-              {hasNext && (
-                <PathConnector
-                  startX={currentX}
-                  endX={nextX}
-                  height={42}
-                  isCompleted={skill.status === "completed"}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
-    </section>
-  );
-};
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+);

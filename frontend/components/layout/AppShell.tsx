@@ -22,7 +22,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   return (
     <div className="min-h-screen bg-[#131f24] text-white">
       <Sidebar />
-      <div className="md:ml-[232px] lg:mr-[368px] min-h-screen pb-20 md:pb-4">
+      <div className="md:ml-[280px] lg:mr-[368px] min-h-screen pb-20 md:pb-4">
         <TopNav
           user={user}
           onHeartsRefilled={onHeartsRefilled}
