@@ -6,22 +6,33 @@ import { CoursePathResponse, UserMeResponse } from "@/types/api";
 import { apiClient } from "@/lib/api/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { LearningPath } from "@/components/learning-path/LearningPath";
+import { LandingHero } from "@/components/landing/LandingHero";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function HomePage() {
   const router = useRouter();
+  const [isGuest, setIsGuest] = useState<boolean | null>(null);
   const [coursePath, setCoursePath] = useState<CoursePathResponse | null>(null);
   const [user, setUser] = useState<UserMeResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
+    // 1. Check synchronous token presence before making network requests
+    const token = typeof window !== "undefined" ? apiClient.getToken() : null;
+    if (!token) {
+      setIsGuest(true);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
+      // 2. Validate current session with backend
       let userData: UserMeResponse;
       try {
         userData = await apiClient.getCurrentUser();
@@ -32,7 +43,10 @@ export default function HomePage() {
           err?.message?.toLowerCase().includes("authentication") ||
           err?.message?.toLowerCase().includes("log in")
         ) {
-          router.push("/login");
+          // Token expired or invalid: clear and show landing page
+          apiClient.setToken(null);
+          setIsGuest(true);
+          setIsLoading(false);
           return;
         }
         throw authErr;
@@ -44,7 +58,9 @@ export default function HomePage() {
       }
 
       setUser(userData);
+      setIsGuest(false);
 
+      // 3. Fetch active course path
       const activeCourseId = userData.selected_course_id || 1;
       const pathData = await apiClient.getCoursePath(activeCourseId);
       setCoursePath(pathData);
@@ -69,6 +85,11 @@ export default function HomePage() {
       setUser({ ...user, hearts: newHearts });
     }
   };
+
+  // If determined to be an unauthenticated guest, immediately display Duolingo Landing Page
+  if (isGuest === true) {
+    return <LandingHero />;
+  }
 
   return (
     <AppShell

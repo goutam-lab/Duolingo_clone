@@ -197,6 +197,16 @@ class ApiClient {
   }
 
   /**
+   * Update user settings such as daily goal XP.
+   */
+  async updateSettings(payload: { daily_goal_xp?: number; avatar_key?: string }): Promise<UserMeResponse> {
+    return this.request<UserMeResponse>("/me/settings", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
    * Fetch lesson metadata and safe exercises (without authoritative answers).
    */
   async getLesson(lessonId: number): Promise<LessonDetailResponse> {

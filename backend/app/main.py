@@ -6,6 +6,12 @@ from app.api.v1.api import api_router
 from app.db.init_db import create_tables
 
 create_tables()
+try:
+    from app.db.seed import seed_all
+    seed_all()
+except Exception as e:
+    import logging
+    logging.getLogger("app.main").warning("Database auto-seed check warning: %s", e)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -38,10 +44,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         headers=exc.headers,
     )
 
-# Set all CORS enabled origins
+# Set all CORS enabled origins with support for Vercel deployments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS or ["*"],
+    allow_origins=settings.BACKEND_CORS_ORIGINS or ["http://localhost:3000"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

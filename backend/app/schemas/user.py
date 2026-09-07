@@ -74,3 +74,8 @@ class HeartRefillResponse(BaseModel):
     hearts: int
     max_hearts: int
     message: str = "Hearts refilled successfully"
+
+
+class UserSettingsUpdate(BaseModel):
+    daily_goal_xp: Optional[int] = None
+    avatar_key: Optional[str] = None

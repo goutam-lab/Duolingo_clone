@@ -11,6 +11,7 @@ from app.schemas.user import (
     ProfileStats,
     ProfileAchievement,
     HeartRefillResponse,
+    UserSettingsUpdate,
 )
 from app.repositories.user_repository import user_repository
 
@@ -106,6 +107,19 @@ class UserService:
             max_hearts=stats.max_hearts,
             message="Hearts refilled successfully",
         )
+
+    def update_settings(
+        self, db: Session, user: User, payload: UserSettingsUpdate
+    ) -> UserMeResponse:
+        if payload.avatar_key is not None:
+            user.avatar_key = payload.avatar_key
+        if payload.daily_goal_xp is not None and user.stats:
+            user.stats.daily_goal_xp = max(5, payload.daily_goal_xp)
+        db.commit()
+        db.refresh(user)
+        if user.stats:
+            db.refresh(user.stats)
+        return self.get_me(db, user)
 
     def get_profile(self, db: Session, user_id: int) -> UserProfileResponse:
         """
