@@ -241,6 +241,45 @@ export interface UserProfileResponse {
   created_at: string;
   stats: ProfileStats;
   achievements: ProfileAchievement[];
+  friendship_status?: "none" | "outgoing" | "incoming" | "friends" | "self" | null;
+  friendship_id?: number | null;
+}
+
+export interface FriendUserPublic {
+  id: number;
+  username: string;
+  avatar_key?: string | null;
+  total_xp: number;
+  current_streak: number;
+}
+
+export interface FriendshipRecord {
+  id: number;
+  status: "pending" | "accepted" | "rejected";
+  created_at: string;
+  user: FriendUserPublic;
+}
+
+export interface FriendRequestsResponse {
+  incoming: FriendshipRecord[];
+  outgoing: FriendshipRecord[];
+}
+
+export interface FriendsListResponse {
+  friends: FriendshipRecord[];
+}
+
+export interface UserSearchResult {
+  id: number;
+  username: string;
+  avatar_key?: string | null;
+  total_xp: number;
+  friendship_status: "none" | "outgoing" | "incoming" | "friends" | "self";
+  friendship_id?: number | null;
+}
+
+export interface UserSearchResponse {
+  results: UserSearchResult[];
 }
 
 export interface AchievementPublic {

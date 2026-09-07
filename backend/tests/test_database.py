@@ -22,8 +22,8 @@ from app.models import (
 )
 
 
-def test_all_14_tables_created(db_engine):
-    """Test that all 14 expected tables exist in the metadata and database."""
+def test_all_tables_created(db_engine):
+    """Test that expected tables exist in the metadata and database."""
     inspector = inspect(db_engine)
     table_names = set(inspector.get_table_names())
 
@@ -42,9 +42,10 @@ def test_all_14_tables_created(db_engine):
         "daily_activity",
         "achievements",
         "user_achievements",
+        "friendships",
     }
     assert expected_tables.issubset(table_names), f"Missing tables: {expected_tables - table_names}"
-    assert len(expected_tables) == 14
+    assert len(expected_tables) == 15
 
 
 def test_sqlite_foreign_key_enforcement(db_session):
@@ -463,4 +464,4 @@ def test_clean_state_database_creation(db_engine):
 
     create_tables(db_engine)
     inspector_recreated = inspect(db_engine)
-    assert len(inspector_recreated.get_table_names()) == 14
+    assert len(inspector_recreated.get_table_names()) == 15

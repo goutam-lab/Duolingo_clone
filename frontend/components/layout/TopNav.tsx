@@ -17,32 +17,30 @@ interface TopNavProps {
 export const TopNav: React.FC<TopNavProps> = ({
   user,
   onHeartsRefilled,
-  courseTitle = "English (Hindi)",
+  courseTitle = "English",
 }) => {
   const streak = user?.current_streak ?? 0;
   const gems = user?.gems ?? 0;
-  const hearts = user?.hearts ?? 5;
+  const hearts = user?.hearts ?? 0;
   const maxHearts = user?.max_hearts ?? 5;
-  const totalXp = user?.total_xp ?? 0;
+  const totalXp = user?.total_xp ?? user?.stats?.total_xp ?? 0;
 
   return (
-    <header className="w-full sticky top-0 bg-[#131f24]/90 backdrop-blur-md border-b-2 border-[#2b3d48] z-30 px-4 py-2.5">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
-        {/* Course Switcher / Flag Badge */}
+    <header className="lg:hidden w-full sticky top-0 bg-[#131f24]/92 backdrop-blur-md border-b-2 border-[#37464f] z-30 px-3 py-2">
+      <div className="flex items-center justify-between gap-2">
         <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-[#1a2c35] border border-transparent hover:border-[#2b3d48] transition-colors cursor-pointer"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-[#1a2c35]"
           title={`Active course: ${courseTitle}`}
         >
-          <div className="w-6 h-6 rounded-md bg-[#1cb0f6]/20 border border-[#1cb0f6] flex items-center justify-center text-xs font-black text-[#1cb0f6]">
-            <Languages className="w-4 h-4" />
+          <div className="w-7 h-7 rounded-md bg-[#1cb0f6]/20 border border-[#1cb0f6] flex items-center justify-center">
+            <Languages className="w-4 h-4 text-[#1cb0f6]" />
           </div>
-          <span className="hidden sm:inline font-bold text-xs text-slate-300">
+          <span className="hidden sm:inline font-bold text-xs text-slate-300 truncate max-w-[140px]">
             {courseTitle}
           </span>
         </div>
 
-        {/* Gamification Stats Header Items */}
-        <div className="flex items-center gap-1 sm:gap-3">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <StreakDisplay streak={streak} />
           <GemsDisplay gems={gems} />
           <HeartsDisplay

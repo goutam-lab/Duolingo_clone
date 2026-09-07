@@ -6,7 +6,6 @@ import {
   Target,
   Zap,
   Gift,
-  Flame,
   Award,
   CheckCircle2,
   Lock,
@@ -152,12 +151,15 @@ export default function QuestsPage() {
                         {dailyGoalProgress} / {dailyGoalXp} XP
                       </span>
                     </div>
-                    <div className="w-full h-3.5 bg-[#131f24] rounded-full overflow-hidden p-0.5 border border-[#2b3d48]">
+                    <div className="w-full h-3.5 bg-[#131f24] rounded-full overflow-hidden border border-[#37464f]">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${
+                        className={`h-full rounded-full ${
                           isGoalCompleted ? "bg-[#58cc02]" : "bg-[#ffc800]"
                         }`}
-                        style={{ width: `${dailyGoalPct}%` }}
+                        style={{
+                          width: `${dailyGoalPct}%`,
+                          transition: "width 0.55s cubic-bezier(0.22, 1, 0.36, 1)",
+                        }}
                       />
                     </div>
                   </div>
@@ -231,7 +233,7 @@ export default function QuestsPage() {
         </div>
       </main>
 
-      <RightSidebar user={user} />
+      <RightSidebar user={user} onHeartsRefilled={handleHeartsRefilled} />
     </div>
   );
 }

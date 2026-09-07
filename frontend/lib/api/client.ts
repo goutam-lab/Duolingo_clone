@@ -17,6 +17,10 @@ import {
   UserProfileResponse,
   AchievementPublic,
   UserAchievementPublic,
+  FriendRequestsResponse,
+  FriendsListResponse,
+  FriendshipRecord,
+  UserSearchResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -264,6 +268,44 @@ class ApiClient {
    */
   async getUserAchievements(): Promise<UserAchievementPublic[]> {
     return this.request<UserAchievementPublic[]>("/me/achievements");
+  }
+
+  async searchUsers(query: string): Promise<UserSearchResponse> {
+    const q = encodeURIComponent(query);
+    return this.request<UserSearchResponse>(`/users/search?q=${q}`);
+  }
+
+  async getFriends(): Promise<FriendsListResponse> {
+    return this.request<FriendsListResponse>("/friends");
+  }
+
+  async getFriendRequests(): Promise<FriendRequestsResponse> {
+    return this.request<FriendRequestsResponse>("/friends/requests");
+  }
+
+  async sendFriendRequest(userId: number): Promise<FriendshipRecord> {
+    return this.request<FriendshipRecord>("/friends/requests", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId }),
+    });
+  }
+
+  async acceptFriendRequest(requestId: number): Promise<FriendshipRecord> {
+    return this.request<FriendshipRecord>(
+      `/friends/requests/${requestId}/accept`,
+      { method: "POST" }
+    );
+  }
+
+  async rejectFriendRequest(requestId: number): Promise<FriendshipRecord> {
+    return this.request<FriendshipRecord>(
+      `/friends/requests/${requestId}/reject`,
+      { method: "POST" }
+    );
+  }
+
+  async unfriend(userId: number): Promise<void> {
+    await this.request<void>(`/friends/${userId}`, { method: "DELETE" });
   }
 }
 

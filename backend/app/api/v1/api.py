@@ -8,6 +8,7 @@ from app.api.v1.endpoints import (
     profile,
     leaderboard,
     achievements,
+    friends,
 )
 
 api_router = APIRouter()
@@ -19,4 +20,5 @@ api_router.include_router(lessons.router, tags=["Lessons"])
 api_router.include_router(profile.router, tags=["Profile"])
 api_router.include_router(leaderboard.router, tags=["Leaderboard"])
 api_router.include_router(achievements.router, tags=["Achievements"])
+api_router.include_router(friends.router, tags=["Friends"])
 

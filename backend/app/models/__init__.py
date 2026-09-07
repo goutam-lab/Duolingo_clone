@@ -12,6 +12,7 @@ from app.models.exercise_attempt import ExerciseAttempt
 from app.models.daily_activity import DailyActivity
 from app.models.achievement import Achievement
 from app.models.user_achievement import UserAchievement
+from app.models.friendship import Friendship
 
 __all__ = [
     "User",
@@ -28,4 +29,5 @@ __all__ = [
     "DailyActivity",
     "Achievement",
     "UserAchievement",
+    "Friendship",
 ]

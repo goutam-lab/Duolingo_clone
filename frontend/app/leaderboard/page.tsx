@@ -9,8 +9,8 @@ import {
   Zap,
   Sparkles,
   ArrowUp,
-  User as UserIcon,
 } from "lucide-react";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { apiClient } from "@/lib/api/client";
 import { LeaderboardResponse, UserMeResponse } from "@/types/api";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -75,10 +75,6 @@ export default function LeaderboardPage() {
     }
   };
 
-  const currentUserEntry = leaderboard?.entries.find(
-    (e) => e.user_id === user?.id
-  );
-
   return (
     <div className="min-h-screen bg-[#131f24] text-white flex flex-row justify-center pb-20 md:pb-0">
       {/* Navigation Sidebar */}
@@ -140,7 +136,7 @@ export default function LeaderboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {leaderboard.entries.map((entry, index) => {
+                    {leaderboard.entries.map((entry) => {
                       const isCurrentUser = entry.user_id === user?.id;
                       const isTop3 = entry.rank <= 3;
                       const isPromotionZone =
@@ -162,16 +158,16 @@ export default function LeaderboardPage() {
                             {/* Rank Badge */}
                             <div className="w-8 flex items-center justify-center font-black shrink-0">
                               {entry.rank === 1 ? (
-                                <div className="w-8 h-8 rounded-full bg-[#ffc800] text-[#131f24] flex items-center justify-center shadow-md shadow-[#ffc800]/30 text-sm">
-                                  🥇
+                                <div className="w-8 h-8 rounded-full bg-[#ffc800] text-[#131f24] flex items-center justify-center shadow-md shadow-[#ffc800]/30">
+                                  <Medal className="w-4 h-4" />
                                 </div>
                               ) : entry.rank === 2 ? (
-                                <div className="w-8 h-8 rounded-full bg-slate-300 text-[#131f24] flex items-center justify-center shadow-md text-sm">
-                                  🥈
+                                <div className="w-8 h-8 rounded-full bg-slate-300 text-[#131f24] flex items-center justify-center shadow-md">
+                                  <Medal className="w-4 h-4" />
                                 </div>
                               ) : entry.rank === 3 ? (
-                                <div className="w-8 h-8 rounded-full bg-[#cd7f32] text-white flex items-center justify-center shadow-md text-sm">
-                                  🥉
+                                <div className="w-8 h-8 rounded-full bg-[#cd7f32] text-white flex items-center justify-center shadow-md">
+                                  <Medal className="w-4 h-4" />
                                 </div>
                               ) : (
                                 <span
@@ -222,7 +218,7 @@ export default function LeaderboardPage() {
                           <div className="flex items-center gap-1.5 shrink-0 pl-2">
                             <Zap className="w-4 h-4 fill-[#ffc800] text-[#ffc800]" />
                             <span className="font-black text-sm sm:text-base text-white">
-                              {entry.total_xp} XP
+                              <AnimatedNumber value={entry.total_xp ?? entry.xp ?? 0} /> XP
                             </span>
                           </div>
                         </div>
@@ -237,7 +233,7 @@ export default function LeaderboardPage() {
       </main>
 
       {/* Right Companion Panel */}
-      <RightSidebar user={user} />
+      <RightSidebar user={user} onHeartsRefilled={handleHeartsRefilled} />
     </div>
   );
 }

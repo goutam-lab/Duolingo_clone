@@ -65,6 +65,8 @@ class UserProfileResponse(BaseModel):
     created_at: datetime
     stats: ProfileStats
     achievements: List[ProfileAchievement] = []
+    friendship_status: Optional[str] = None
+    friendship_id: Optional[int] = None
 
 
 class HeartRefillResponse(BaseModel):

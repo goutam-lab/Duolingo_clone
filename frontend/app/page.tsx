@@ -4,9 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CoursePathResponse, UserMeResponse } from "@/types/api";
 import { apiClient } from "@/lib/api/client";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { TopNav } from "@/components/layout/TopNav";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { AppShell } from "@/components/layout/AppShell";
 import { LearningPath } from "@/components/learning-path/LearningPath";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -24,15 +22,15 @@ export default function HomePage() {
     setError(null);
 
     try {
-      // 1. Fetch current authenticated user first
       let userData: UserMeResponse;
       try {
         userData = await apiClient.getCurrentUser();
-      } catch (authErr: any) {
+      } catch (authErr: unknown) {
+        const err = authErr as { status?: number; message?: string };
         if (
-          authErr?.status === 401 ||
-          authErr?.message?.toLowerCase().includes("authentication") ||
-          authErr?.message?.toLowerCase().includes("log in")
+          err?.status === 401 ||
+          err?.message?.toLowerCase().includes("authentication") ||
+          err?.message?.toLowerCase().includes("log in")
         ) {
           router.push("/login");
           return;
@@ -40,7 +38,6 @@ export default function HomePage() {
         throw authErr;
       }
 
-      // Check onboarding
       if (userData.onboarding_completed === false) {
         router.push("/onboarding");
         return;
@@ -48,7 +45,6 @@ export default function HomePage() {
 
       setUser(userData);
 
-      // 2. Fetch learning path for user's selected course
       const activeCourseId = userData.selected_course_id || 1;
       const pathData = await apiClient.getCoursePath(activeCourseId);
       setCoursePath(pathData);
@@ -68,7 +64,6 @@ export default function HomePage() {
     loadData();
   }, [loadData]);
 
-
   const handleHeartsRefilled = (newHearts: number) => {
     if (user) {
       setUser({ ...user, hearts: newHearts });
@@ -76,39 +71,25 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#131f24] text-white flex flex-row justify-center pb-20 md:pb-0">
-      {/* Left Navigation Sidebar */}
-      <Sidebar />
+    <AppShell
+      user={user}
+      onHeartsRefilled={handleHeartsRefilled}
+      courseTitle={coursePath?.course.title}
+    >
+      {isLoading && <LoadingState />}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-2xl min-h-screen flex flex-col border-r border-[#2b3d48]/40">
-        {/* Top Gamification Bar */}
-        <TopNav
-          user={user}
-          onHeartsRefilled={handleHeartsRefilled}
-          courseTitle={coursePath?.course.title}
-        />
+      {!isLoading && error && <ErrorState message={error} onRetry={loadData} />}
 
-        {/* Dynamic Learning Path Body */}
-        <div className="flex-1 w-full">
-          {isLoading && <LoadingState />}
+      {!isLoading &&
+        !error &&
+        coursePath &&
+        (!coursePath.units || coursePath.units.length === 0) && <EmptyState />}
 
-          {!isLoading && error && (
-            <ErrorState message={error} onRetry={loadData} />
-          )}
-
-          {!isLoading && !error && coursePath && (!coursePath.units || coursePath.units.length === 0) && (
-            <EmptyState />
-          )}
-
-          {!isLoading && !error && coursePath && coursePath.units && coursePath.units.length > 0 && (
-            <LearningPath coursePath={coursePath} />
-          )}
-        </div>
-      </main>
-
-      {/* Right Companion Panel (Desktop) */}
-      <RightSidebar user={user} />
-    </div>
+      {!isLoading &&
+        !error &&
+        coursePath &&
+        coursePath.units &&
+        coursePath.units.length > 0 && <LearningPath coursePath={coursePath} />}
+    </AppShell>
   );
 }

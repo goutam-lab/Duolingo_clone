@@ -20,6 +20,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { RightSidebar } from "@/components/layout/RightSidebar";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -78,7 +79,14 @@ export default function ProfilePage() {
 
   const unlockedCount =
     profile?.achievements.filter((a) => a.is_unlocked).length ?? 0;
-  const totalAchievements = profile?.achievements.length ?? 5;
+  const totalAchievements = profile?.achievements.length ?? 0;
+  const stats = profile?.stats;
+  const totalXp = stats?.total_xp ?? user?.total_xp ?? 0;
+  const currentStreak = stats?.current_streak ?? user?.current_streak ?? 0;
+  const longestStreak = stats?.longest_streak ?? user?.longest_streak ?? 0;
+  const completedLessons = stats?.completed_lessons ?? 0;
+  const completedSkills = stats?.completed_skills ?? 0;
+  const leagueLabel = totalXp > 0 ? "Bronze" : "None";
 
   const formatDate = (isoString?: string) => {
     if (!isoString) return "Recently";
@@ -154,7 +162,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        {profile.stats.current_streak}
+                        <AnimatedNumber value={currentStreak} />
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Day Streak
@@ -169,7 +177,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        {profile.stats.total_xp}
+                        <AnimatedNumber value={totalXp} />
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Total XP
@@ -184,7 +192,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        Bronze
+                        {leagueLabel}
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Current League
@@ -199,7 +207,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        {profile.stats.completed_lessons}
+                        <AnimatedNumber value={completedLessons} />
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Lessons Done
@@ -214,7 +222,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        {profile.stats.completed_skills}
+                        <AnimatedNumber value={completedSkills} />
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Skills Crowned
@@ -229,7 +237,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="text-xl font-black text-white">
-                        {profile.stats.longest_streak}
+                        <AnimatedNumber value={longestStreak} />
                       </div>
                       <div className="text-[11px] font-extrabold uppercase text-slate-400">
                         Best Streak
@@ -321,7 +329,7 @@ export default function ProfilePage() {
       </main>
 
       {/* Right Companion Panel */}
-      <RightSidebar user={user} />
+      <RightSidebar user={user} onHeartsRefilled={handleHeartsRefilled} />
     </div>
   );
 }

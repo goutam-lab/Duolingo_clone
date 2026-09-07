@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { LessonDetailResponse, LessonCompleteResponse } from "@/types/api";
@@ -15,6 +16,7 @@ import { LessonComplete } from "@/components/lesson/LessonComplete";
 export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
   const lessonIdStr = params?.lessonId as string;
   const lessonId = parseInt(lessonIdStr, 10);
 
@@ -323,19 +325,46 @@ export default function LessonPage() {
       />
 
       {/* Main Exercise Question Area */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 w-full max-w-4xl mx-auto">
-        {currentExercise ? (
-          <ExerciseRenderer
-            exercise={currentExercise}
-            selectedAnswer={selectedAnswer}
-            onAnswerChange={(ans) => setSelectedAnswer(ans)}
-            disabled={isSubmitted || isChecking}
-          />
-        ) : (
-          <div className="text-center text-slate-400">
-            No exercises available in this lesson.
-          </div>
-        )}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 w-full max-w-4xl mx-auto overflow-hidden">
+        <AnimatePresence mode="wait">
+          {currentExercise ? (
+            <motion.div
+              key={currentExercise.id}
+              className="w-full"
+              initial={
+                shouldReduceMotion
+                  ? { opacity: 1 }
+                  : { opacity: 0, x: 28, scale: 0.98 }
+              }
+              animate={
+                isSubmitted && isCorrect === false && !shouldReduceMotion
+                  ? { opacity: 1, x: [0, -8, 8, -5, 5, 0], scale: 1 }
+                  : { opacity: 1, x: 0, scale: 1 }
+              }
+              exit={
+                shouldReduceMotion
+                  ? { opacity: 0 }
+                  : { opacity: 0, x: -24, scale: 0.98 }
+              }
+              transition={
+                isSubmitted && isCorrect === false && !shouldReduceMotion
+                  ? { duration: 0.42 }
+                  : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
+              }
+            >
+              <ExerciseRenderer
+                exercise={currentExercise}
+                selectedAnswer={selectedAnswer}
+                onAnswerChange={(ans) => setSelectedAnswer(ans)}
+                disabled={isSubmitted || isChecking}
+              />
+            </motion.div>
+          ) : (
+            <div className="text-center text-slate-400">
+              No exercises available in this lesson.
+            </div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Bottom Action / Feedback Drawer */}

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Heart,
   Sparkles,
-  Zap,
   Check,
   Loader2,
   Shield,
@@ -112,7 +111,7 @@ export default function ShopPage() {
                     Use gems to replenish hearts and protect your daily streaks.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#131f24] border-2 border-[#2b3d48] text-[#1cb0f6] font-black text-base shrink-0">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#131f24] border-2 border-[#37464f] text-[#1cb0f6] font-black text-base shrink-0">
                   <Gem className="w-5 h-5 fill-[#1cb0f6]" />
                   <span>{user?.gems ?? 0}</span>
                 </div>
@@ -124,7 +123,7 @@ export default function ShopPage() {
                   Hearts
                 </h2>
 
-                <div className="p-5 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="p-5 rounded-2xl bg-[#1a2c35] border-2 border-[#37464f] flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-[#ff4b4b]/40">
                   <div className="flex items-center gap-4 text-center sm:text-left">
                     <div className="w-14 h-14 rounded-2xl bg-[#ff4b4b]/15 border-2 border-[#ff4b4b]/30 flex items-center justify-center shrink-0">
                       <Heart className="w-8 h-8 fill-[#ff4b4b] text-[#ff4b4b]" />
@@ -209,7 +208,7 @@ export default function ShopPage() {
         </div>
       </main>
 
-      <RightSidebar user={user} />
+      <RightSidebar user={user} onHeartsRefilled={(h) => user && setUser({ ...user, hearts: h })} />
     </div>
   );
 }

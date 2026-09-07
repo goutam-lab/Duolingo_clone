@@ -1,10 +1,20 @@
 "use client";
 
 import React from "react";
-import { Star, Lock, Check, Crown, Gift, BookOpen, Headphones, Trophy, Sparkles } from "lucide-react";
+import {
+  Check,
+  Crown,
+  Gift,
+  Headphones,
+  Lock,
+  Sparkles,
+  Star,
+  Trophy,
+} from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SkillPathResponse } from "@/types/api";
 import { SkillProgressRing } from "./SkillProgressRing";
+import { springSnappy } from "@/lib/motion";
 
 interface SkillNodeProps {
   skill: SkillPathResponse;
@@ -22,11 +32,9 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
 
   const isLocked = status === "locked";
   const isAvailable = status === "available";
-  const isInProgress = status === "in_progress";
   const isCompleted = status === "completed";
   const isChest = node_type === "chest" || icon_key === "chest";
 
-  // Dynamic icon selection
   const renderIcon = () => {
     if (isLocked) {
       return <Lock className="w-8 h-8 text-[#677b88]" />;
@@ -51,25 +59,23 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
       case "sparkles":
         return <Sparkles className="w-8 h-8 text-white" />;
       default:
-        return <BookOpen className="w-8 h-8 text-white stroke-[2.5]" />;
+        return <Star className="w-8 h-8 fill-white text-white" />;
     }
   };
 
-  // 3D Button colors based on state
   let buttonClasses = "";
   if (isLocked) {
     buttonClasses =
       "bg-[#37464f] border-b-[6px] border-[#25333a] cursor-not-allowed text-[#677b88] opacity-85";
   } else if (isCompleted) {
     buttonClasses =
-      "bg-[#ffc800] border-b-[6px] border-[#e5a500] hover:brightness-105 active:translate-y-1 active:border-b-[2px] text-white shadow-lg shadow-[#ffc800]/20";
+      "bg-[#ffc800] border-b-[6px] border-[#e5a500] text-white shadow-[0_8px_18px_rgba(255,200,0,0.22)]";
   } else if (isChest) {
     buttonClasses =
-      "bg-[#ce82ff] border-b-[6px] border-[#a559d9] hover:brightness-105 active:translate-y-1 active:border-b-[2px] text-white shadow-lg shadow-[#ce82ff]/20";
+      "bg-[#ce82ff] border-b-[6px] border-[#a559d9] text-white shadow-[0_8px_18px_rgba(206,130,255,0.22)]";
   } else {
-    // available or in_progress: vibrant Duolingo green
     buttonClasses =
-      "bg-[#58cc02] border-b-[6px] border-[#46a302] hover:brightness-105 active:translate-y-1 active:border-b-[2px] text-white shadow-lg shadow-[#58cc02]/25";
+      "bg-[#58cc02] border-b-[6px] border-[#46a302] text-white shadow-[0_8px_18px_rgba(88,204,2,0.28)]";
   }
 
   const handleClick = () => {
@@ -79,64 +85,75 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
   };
 
   return (
-    <div className="relative flex flex-col items-center select-none group">
-      {/* Playful "START" banner hovering above the first active available skill node */}
-      {isAvailable && isFirstAvailable && (
-        <motion.div
-          initial={{ y: -6, opacity: 0 }}
-          animate={{ y: [0, -6, 0], opacity: 1 }}
-          transition={
-            shouldReduceMotion
-              ? { duration: 0 }
-              : { repeat: Infinity, duration: 1.8, ease: "easeInOut" }
-          }
-          className="absolute -top-11 z-20 bg-white text-[#58cc02] font-black text-xs uppercase tracking-wider px-3.5 py-1.5 rounded-xl shadow-lg border-2 border-[#58cc02] flex items-center gap-1 pointer-events-none"
+    <div
+      data-skill-id={skill.id}
+      data-skill-status={status}
+      className="relative z-10 flex flex-col items-center select-none w-[132px]"
+    >
+      <div className="h-11 w-full flex flex-col items-center justify-end mb-2 relative">
+        {isAvailable && isFirstAvailable && (
+          <motion.div
+            initial={{ y: -4, opacity: 0 }}
+            animate={
+              shouldReduceMotion
+                ? { y: 0, opacity: 1 }
+                : { y: [0, -4, 0], opacity: 1 }
+            }
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { repeat: Infinity, duration: 2, ease: "easeInOut" }
+            }
+            className="absolute -top-7 z-20 bg-[#131f24] text-[#58cc02] font-black text-[11px] uppercase tracking-wider px-3 py-1 rounded-lg shadow-lg border-2 border-[#58cc02] pointer-events-none"
+          >
+            <span>Start</span>
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#131f24] border-r-2 border-b-2 border-[#58cc02] rotate-45" />
+          </motion.div>
+        )}
+        <span
+          className={`px-2 py-0.5 text-[11px] leading-tight font-extrabold text-center line-clamp-2 max-w-[128px] rounded-md bg-[#131f24]/90 ${
+            isLocked ? "text-slate-500" : "text-slate-100"
+          }`}
         >
-          <span>START</span>
-          {/* Tooltip caret */}
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-r-2 border-b-2 border-[#58cc02] rotate-45" />
-        </motion.div>
-      )}
+          {title}
+        </span>
+      </div>
 
-      {/* Wrapping Skill Progress Ring */}
       <SkillProgressRing
         percentage={progress?.progress_percentage || 0}
         status={status}
         size={86}
         strokeWidth={7}
       >
-        <button
+        <motion.button
           type="button"
           onClick={handleClick}
           disabled={isLocked}
           aria-disabled={isLocked}
-          aria-label={`Skill: ${title}. Status: ${status}. ${progress?.lessons_completed || 0} of ${
-            progress?.total_lessons || 0
-          } lessons completed.`}
-          className={`w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-100 ${buttonClasses}`}
+          whileHover={
+            shouldReduceMotion || isLocked ? undefined : { y: -2, scale: 1.03 }
+          }
+          whileTap={
+            shouldReduceMotion || isLocked ? undefined : { y: 3, scale: 0.97 }
+          }
+          transition={springSnappy}
+          aria-label={`Skill: ${title}. Status: ${status}. ${
+            progress?.lessons_completed || 0
+          } of ${progress?.total_lessons || 0} lessons completed.`}
+          className={`w-[70px] h-[70px] rounded-full flex items-center justify-center ${buttonClasses}`}
         >
           {renderIcon()}
-        </button>
+        </motion.button>
       </SkillProgressRing>
 
-      {/* Floating Crown Badge for Completed Skills */}
       {isCompleted && (
         <div
-          className="absolute -bottom-1 -right-1 z-20 bg-[#ffc800] border-2 border-[#131f24] rounded-full p-1 shadow"
+          className="absolute bottom-0 right-4 z-20 bg-[#ffc800] border-2 border-[#131f24] rounded-full p-1 shadow"
           title={`Crown Level ${progress?.crown_level || 1}`}
         >
           <Crown className="w-4 h-4 fill-white text-white" />
         </div>
       )}
-
-      {/* Accessible Title tooltip / text label below node */}
-      <span
-        className={`mt-2 text-xs font-extrabold text-center max-w-[110px] truncate ${
-          isLocked ? "text-slate-500" : "text-slate-200"
-        }`}
-      >
-        {title}
-      </span>
     </div>
   );
 };

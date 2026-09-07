@@ -1,82 +1,113 @@
 "use client";
 
-import React, { useState } from "react";
-import { Flame, CalendarCheck2, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { CalendarCheck2, Flame } from "lucide-react";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { popoverTransition } from "@/lib/motion";
 
 interface StreakDisplayProps {
   streak: number;
 }
 
 export const StreakDisplay: React.FC<StreakDisplayProps> = ({ streak }) => {
-  const [showPopover, setShowPopover] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimer = useRef<number | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const hasStreak = streak > 0;
 
+  const clearCloseTimer = () => {
+    if (closeTimer.current !== null) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const openPopover = () => {
+    clearCloseTimer();
+    setIsOpen(true);
+  };
+
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimer.current = window.setTimeout(() => setIsOpen(false), 140);
+  };
+
+  useEffect(() => () => clearCloseTimer(), []);
+
+  const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const next = event.relatedTarget as Node | null;
+    if (next && rootRef.current?.contains(next)) return;
+    setIsOpen(false);
+  };
+
   return (
-    <div className="relative">
-      <button
+    <div
+      ref={rootRef}
+      className="relative"
+      onMouseEnter={openPopover}
+      onMouseLeave={scheduleClose}
+      onFocus={openPopover}
+      onBlur={handleBlur}
+    >
+      <motion.button
         type="button"
-        onClick={() => setShowPopover((prev) => !prev)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-sm tracking-wide transition-colors cursor-pointer group focus:outline-hidden focus:ring-2 focus:ring-[#ff9600]/40 ${
+        whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+        onClick={() => setIsOpen((open) => !open)}
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-sm tracking-wide cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff9600] ${
           hasStreak
             ? "text-[#ff9600] hover:bg-[#ff9600]/10"
-            : "text-slate-400 hover:bg-slate-800"
+            : "text-slate-400 hover:bg-white/5"
         }`}
-        title={`${streak} Day Streak. Click to view streak details.`}
-        role="status"
-        aria-label={`${streak} day streak. Click for details.`}
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        aria-label={`${streak} day streak`}
       >
-        <Flame
-          className={`w-5 h-5 transition-transform group-hover:scale-110 ${
-            hasStreak ? "fill-[#ff9600] animate-pulse" : "text-slate-500"
-          }`}
-        />
-        <span>{streak}</span>
-      </button>
+        <Flame className={`w-5 h-5 ${hasStreak ? "fill-[#ff9600]" : ""}`} />
+        <AnimatedNumber value={streak} />
+      </motion.button>
 
-      {/* Interactive Streak Popover */}
-      {showPopover && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowPopover(false)}
-          />
-          <div
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 p-4 bg-[#1a2c35] border-2 border-[#2b3d48] rounded-2xl shadow-xl z-50 text-center animate-in fade-in zoom-in-95 duration-150 text-white select-none"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
             role="dialog"
             aria-label="Streak details"
+            initial={
+              shouldReduceMotion
+                ? { opacity: 1 }
+                : { opacity: 0, scale: 0.96, y: -4 }
+            }
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, scale: 0.96, y: -4 }
+            }
+            transition={shouldReduceMotion ? { duration: 0 } : popoverTransition}
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 p-4 rounded-2xl bg-[#1a2c35] border-2 border-[#37464f] shadow-[0_12px_32px_rgba(0,0,0,0.45)] z-50 text-center text-white"
+            onMouseEnter={openPopover}
+            onMouseLeave={scheduleClose}
           >
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowPopover(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#243843] transition-colors"
-                aria-label="Close streak details"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-[#ff9600]/15 border-2 border-[#ff9600]/30 flex items-center justify-center text-[#ff9600]">
+              <Flame className="w-7 h-7 fill-[#ff9600]" />
             </div>
-
-            <div className="w-14 h-14 mx-auto mb-2 rounded-2xl bg-[#ff9600]/15 border-2 border-[#ff9600]/30 flex items-center justify-center text-[#ff9600]">
-              <Flame className="w-8 h-8 fill-[#ff9600]" />
-            </div>
-
-            <h4 className="text-lg font-black text-white">
-              {hasStreak ? `${streak} Day Streak!` : "No Active Streak"}
+            <h4 className="text-lg font-black">
+              {hasStreak ? `${streak} day streak` : "Start a streak"}
             </h4>
-
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-xs text-[#afafaf] mt-1 leading-relaxed">
               {hasStreak
-                ? "You're on fire! Practice tomorrow to keep your flame burning and build your learning habit."
-                : "Complete a lesson today to ignite your streak and build momentum!"}
+                ? "Practice tomorrow to keep your streak alive."
+                : "Complete a lesson today to light your streak."}
             </p>
-
-            <div className="mt-3 pt-3 border-t border-[#2b3d48] flex items-center justify-center gap-1.5 text-xs font-bold text-[#ff9600]">
+            <div className="mt-3 pt-3 border-t border-[#37464f] flex items-center justify-center gap-1.5 text-xs font-bold text-[#ff9600]">
               <CalendarCheck2 className="w-4 h-4" />
-              <span>{hasStreak ? "Active for today" : "Practice to activate"}</span>
+              <span>{hasStreak ? "Active today" : "Not started yet"}</span>
             </div>
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

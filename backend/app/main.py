@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
+from app.db.init_db import create_tables
+
+create_tables()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

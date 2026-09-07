@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.lesson_attempt import LessonAttempt
     from app.models.daily_activity import DailyActivity
     from app.models.user_achievement import UserAchievement
+    from app.models.friendship import Friendship
 
 
 class User(Base):
@@ -50,6 +51,18 @@ class User(Base):
     )
     achievements: Mapped[List["UserAchievement"]] = relationship(
         "UserAchievement", back_populates="user", cascade="all, delete-orphan"
+    )
+    sent_friendships: Mapped[List["Friendship"]] = relationship(
+        "Friendship",
+        foreign_keys="Friendship.requester_id",
+        back_populates="requester",
+        cascade="all, delete-orphan",
+    )
+    received_friendships: Mapped[List["Friendship"]] = relationship(
+        "Friendship",
+        foreign_keys="Friendship.addressee_id",
+        back_populates="addressee",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
