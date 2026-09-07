@@ -12,9 +12,7 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { UserMeResponse, UserProfileResponse } from "@/types/api";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { TopNav } from "@/components/layout/TopNav";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { AppShell } from "@/components/layout/AppShell";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function QuestsPage() {
@@ -78,13 +76,8 @@ export default function QuestsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#131f24] text-white flex flex-row justify-center pb-20 md:pb-0">
-      <Sidebar />
-
-      <main className="flex-1 max-w-2xl min-h-screen flex flex-col border-r border-[#2b3d48]/40">
-        <TopNav user={user} onHeartsRefilled={handleHeartsRefilled} />
-
-        <div className="flex-1 w-full p-4 sm:p-6 space-y-6">
+    <AppShell user={user} onHeartsRefilled={handleHeartsRefilled}>
+      <div className="w-full p-3 sm:p-4 space-y-4">
           {isLoading ? (
             <div className="space-y-4 animate-pulse">
               <div className="w-full h-32 rounded-3xl bg-[#1a2c35]" />
@@ -231,9 +224,6 @@ export default function QuestsPage() {
             </>
           )}
         </div>
-      </main>
-
-      <RightSidebar user={user} onHeartsRefilled={handleHeartsRefilled} />
-    </div>
+    </AppShell>
   );
 }

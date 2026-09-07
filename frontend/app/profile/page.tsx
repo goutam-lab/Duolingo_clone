@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Flame,
@@ -13,12 +14,11 @@ import {
   Lock,
   CheckCircle2,
   Sparkles,
+  Users,
 } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
-import { UserMeResponse, UserProfileResponse } from "@/types/api";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { TopNav } from "@/components/layout/TopNav";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { FriendshipRecord, UserMeResponse, UserProfileResponse } from "@/types/api";
+import { AppShell } from "@/components/layout/AppShell";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserMeResponse | null>(null);
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
+  const [friends, setFriends] = useState<FriendshipRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,9 +53,12 @@ export default function ProfilePage() {
 
       setUser(userData);
 
-      // 2. Fetch authenticated user's profile details
-      const profileData = await apiClient.getMyProfile();
+      const [profileData, friendsData] = await Promise.all([
+        apiClient.getMyProfile(),
+        apiClient.getFriends(),
+      ]);
       setProfile(profileData);
+      setFriends(friendsData.friends);
     } catch (err) {
       console.error("Failed to load profile:", err);
       setError(
@@ -102,15 +106,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#131f24] text-white flex flex-row justify-center pb-20 md:pb-0">
-      {/* Navigation Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <main className="flex-1 max-w-2xl min-h-screen flex flex-col border-r border-[#2b3d48]/40">
-        <TopNav user={user} onHeartsRefilled={handleHeartsRefilled} />
-
-        <div className="flex-1 w-full p-4 sm:p-6 space-y-6">
+    <AppShell user={user} onHeartsRefilled={handleHeartsRefilled}>
+      <div className="w-full p-3 sm:p-4 space-y-4">
           {isLoading && <ProfileSkeleton />}
 
           {!isLoading && error && (
@@ -122,7 +119,7 @@ export default function ProfilePage() {
               {/* Profile Header Card */}
               <section
                 aria-label="User Profile Header"
-                className="p-6 rounded-3xl bg-[#1a2c35] border-2 border-[#2b3d48] flex flex-col sm:flex-row items-center sm:items-start gap-5 shadow-lg relative overflow-hidden"
+                className="p-4 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] flex flex-col sm:flex-row items-center sm:items-start gap-4 relative overflow-hidden"
               >
                 <div className="w-24 h-24 rounded-full bg-linear-to-br from-[#58cc02] to-[#1cb0f6] p-1 shadow-md shadow-[#58cc02]/20 shrink-0">
                   <div className="w-full h-full rounded-full bg-[#131f24] flex items-center justify-center text-3xl font-black text-[#58cc02] uppercase select-none">
@@ -247,6 +244,52 @@ export default function ProfilePage() {
                 </div>
               </section>
 
+              {/* Friends */}
+              <section aria-label="Friends" className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h2 className="font-extrabold text-sm uppercase tracking-wider text-slate-400">
+                    Friends
+                  </h2>
+                  <Link
+                    href="/friends"
+                    className="text-xs font-bold text-[#1cb0f6] uppercase tracking-wide hover:underline"
+                  >
+                    View all
+                  </Link>
+                </div>
+                {friends.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#1cb0f6]/15 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-[#1cb0f6]" />
+                    </div>
+                    <div className="text-sm text-slate-400">
+                      No friends yet. Search usernames on the Friends page.
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {friends.slice(0, 6).map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-3 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] flex items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-[#131f24] border border-[#37464f] flex items-center justify-center text-[11px] font-black text-[#58cc02]">
+                          {item.user.username.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-black truncate">
+                            {item.user.username}
+                          </div>
+                          <div className="text-[11px] text-slate-400">
+                            {item.user.total_xp} XP
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
               {/* Achievements Section */}
               <section aria-label="Achievements Catalog" className="space-y-3 pt-2">
                 <div className="flex items-center justify-between px-1">
@@ -326,11 +369,7 @@ export default function ProfilePage() {
             </>
           )}
         </div>
-      </main>
-
-      {/* Right Companion Panel */}
-      <RightSidebar user={user} onHeartsRefilled={handleHeartsRefilled} />
-    </div>
+    </AppShell>
   );
 }
 

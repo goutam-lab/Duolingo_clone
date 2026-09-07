@@ -22,13 +22,13 @@ export const AppShell: React.FC<AppShellProps> = ({
   return (
     <div className="min-h-screen bg-[#131f24] text-white">
       <Sidebar />
-      <div className="md:ml-[216px] lg:mr-[320px] min-h-screen pb-24 md:pb-8">
+      <div className="md:ml-[232px] lg:mr-[368px] min-h-screen pb-20 md:pb-4">
         <TopNav
           user={user}
           onHeartsRefilled={onHeartsRefilled}
           courseTitle={courseTitle}
         />
-        <div className="w-full max-w-[640px] mx-auto">{children}</div>
+        <div className="w-full max-w-[598px] mx-auto">{children}</div>
       </div>
       <RightSidebar user={user} onHeartsRefilled={onHeartsRefilled} />
     </div>

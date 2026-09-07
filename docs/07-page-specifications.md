@@ -138,7 +138,34 @@ Avatar
 Username
 XP
 Current user highlight
-7. Settings Page
+7. Friends Page
+
+Route:
+
+text
+/friends
+
+Show:
+
+Username search
+Incoming friend requests
+Outgoing requests
+Accepted friends
+Add / accept / reject / unfriend actions
+
+API:
+
+text
+GET /api/v1/users/search
+GET /api/v1/friends
+GET /api/v1/friends/requests
+POST /api/v1/friends/requests
+POST /api/v1/friends/requests/{id}/accept
+POST /api/v1/friends/requests/{id}/reject
+DELETE /api/v1/friends/{user_id}
+
+The learning path uses sticky unit headers so the current unit banner stays pinned while the path scrolls, matching the compact vertical path spacing of the product reference.
+8. Settings Page
 
 Route:
 
@@ -154,7 +181,7 @@ Sound
 Language
 Appearance
 Account
-8. Loading States
+9. Loading States
 
 Every API-driven page must have appropriate loading states.
 
@@ -164,7 +191,7 @@ Learning path skeleton
 Lesson loading
 Profile skeleton
 Leaderboard skeleton
-9. Error States
+10. Error States
 
 Example:
 
@@ -177,7 +204,7 @@ Error messages should be understandable.
 
 Do not display raw backend exceptions.
 
-10. Empty States
+11. Empty States
 
 Example:
 
@@ -185,7 +212,7 @@ text
 No achievements yet.
 
 Complete lessons to unlock achievements.
-11. Navigation
+12. Navigation
 
 The user should always understand:
 

@@ -32,6 +32,7 @@ Profile
 Statistics
 Leaderboard
 Achievements
+Friends
 Responsive UI
 Animations
 Loading states

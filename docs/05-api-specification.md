@@ -260,7 +260,20 @@ GET /me/achievements
 
 Returns achievements unlocked by the current user.
 
-11. Error Response
+11. Friends
+text
+GET /users/search?q=
+GET /friends
+GET /friends/requests
+POST /friends/requests
+POST /friends/requests/{id}/accept
+POST /friends/requests/{id}/reject
+DELETE /friends/{user_id}
+
+Search returns public users with viewer relationship status.
+Friend list and requests are scoped to the authenticated user.
+
+12. Error Response
 
 Use a consistent structure:
 
@@ -271,7 +284,7 @@ json
     "message": "This lesson is not currently available."
   }
 }
-12. HTTP Status Codes
+13. HTTP Status Codes
 
 Use:
 
@@ -284,7 +297,7 @@ Use:
 409 Conflict
 422 Validation Error
 500 Internal Server Error
-13. API Principles
+14. API Principles
 Use /api/v1.
 Validate request bodies.
 Use Pydantic response schemas.

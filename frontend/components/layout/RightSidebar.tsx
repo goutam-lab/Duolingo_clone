@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Languages, Shield, Sparkles, Trophy } from "lucide-react";
+import { Languages, Shield, Sparkles, Trophy, Users } from "lucide-react";
 import { UserMeResponse } from "@/types/api";
 import { DailyGoalCard } from "@/components/gamification/DailyGoalCard";
 import { StreakDisplay } from "@/components/gamification/StreakDisplay";
@@ -29,7 +29,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
   return (
     <aside
-      className="hidden lg:flex flex-col gap-4 w-[320px] p-4 pt-5 select-none fixed right-0 top-0 h-dvh overflow-y-auto z-30 bg-[#131f24]"
+      className="hidden lg:flex flex-col gap-3 w-[368px] p-3 pt-3 select-none fixed right-0 top-0 h-dvh overflow-y-auto z-30 bg-[#131f24]"
       aria-label="Companion Sidebar"
     >
       <div className="flex items-center justify-end gap-1">
@@ -50,7 +50,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
       <motion.div
         whileHover={shouldReduceMotion ? undefined : { y: -2 }}
-        className="p-5 rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] relative overflow-hidden"
+        className="p-4 rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] relative overflow-hidden"
       >
         <div className="flex items-center gap-1.5 text-xs font-black text-[#ce82ff] uppercase tracking-wider mb-2">
           <Sparkles className="w-4 h-4" />
@@ -59,12 +59,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <h3 className="text-base font-black text-white leading-snug mb-1.5">
           Learn without limits
         </h3>
-        <p className="text-xs text-[#afafaf] leading-relaxed mb-4">
+        <p className="text-xs text-[#afafaf] leading-relaxed mb-3">
           Unlimited hearts, extra practice, and a calmer lesson flow.
         </p>
         <Link
           href="/shop"
-          className="block text-center w-full py-3 px-4 rounded-2xl bg-[#1cb0f6] border-b-4 border-[#1899d6] hover:brightness-105 active:translate-y-0.5 active:border-b-2 font-black text-xs uppercase tracking-wider text-white"
+          className="block text-center w-full py-2.5 px-4 rounded-2xl bg-[#1cb0f6] border-b-4 border-[#1899d6] hover:brightness-105 active:translate-y-0.5 active:border-b-2 font-black text-xs uppercase tracking-wider text-white"
         >
           Try Super
         </Link>
@@ -72,7 +72,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
       <Link
         href="/leaderboard"
-        className="block p-4 rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group"
+        className="block p-3.5 rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group"
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-extrabold text-sm uppercase tracking-wider text-[#afafaf] group-hover:text-white">
@@ -91,6 +91,21 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             </div>
           </div>
         </div>
+      </Link>
+
+      <Link
+        href="/friends"
+        className="block p-3.5 rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#1cb0f6]/50 text-white group"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-extrabold text-sm uppercase tracking-wider text-[#afafaf] group-hover:text-white">
+            Friends
+          </h3>
+          <Users className="w-4 h-4 text-[#1cb0f6]" />
+        </div>
+        <p className="text-[11px] text-[#afafaf] leading-snug">
+          Add friends, accept requests, and compare streaks.
+        </p>
       </Link>
 
       <DailyGoalCard progress={dailyGoalProgress} goal={dailyGoalXp} />

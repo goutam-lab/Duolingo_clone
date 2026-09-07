@@ -9,6 +9,7 @@ frontend/
 │   ├── page.tsx
 │   ├── lesson/
 │   ├── profile/
+│   ├── friends/
 │   ├── leaderboard/
 │   └── settings/
 │

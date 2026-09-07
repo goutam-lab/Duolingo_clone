@@ -13,7 +13,7 @@ interface PathConnectorProps {
 export const PathConnector: React.FC<PathConnectorProps> = ({
   startX,
   endX,
-  height = 72,
+  height = 42,
   isCompleted = false,
 }) => {
   const shouldReduceMotion = useReducedMotion();
@@ -44,7 +44,7 @@ export const PathConnector: React.FC<PathConnectorProps> = ({
         <motion.path
           d={pathData}
           stroke={strokeColor}
-          strokeWidth="10"
+          strokeWidth="8"
           strokeLinecap="round"
           initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0.4 }}
           whileInView={{ pathLength: 1, opacity: 1 }}

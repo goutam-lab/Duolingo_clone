@@ -31,7 +31,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
 
   useEffect(() => {
     const onScroll = () => {
-      setShowJump(window.scrollY > 480);
+      setShowJump(window.scrollY > 320);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -39,17 +39,15 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
   }, []);
 
   useEffect(() => {
-    if (!firstAvailableSkillId) return;
-    const node = document.querySelector(
-      `[data-skill-id="${firstAvailableSkillId}"]`
-    );
-    if (node) {
-      node.scrollIntoView({ block: "center", behavior: "smooth" });
-    }
+    const currentUnit = document.querySelector('[data-current-unit="true"]');
+    if (!currentUnit) return;
+    const rect = currentUnit.getBoundingClientRect();
+    if (rect.top > 80 && rect.top < window.innerHeight * 0.45) return;
+    currentUnit.scrollIntoView({ block: "start" });
   }, [firstAvailableSkillId]);
 
   return (
-    <div className="w-full flex flex-col items-center py-6 px-3 sm:px-6">
+    <div className="w-full flex flex-col items-center pt-3 pb-8 px-2 sm:px-3">
       {units.map((unit) => (
         <UnitSection
           key={unit.id}
@@ -69,7 +67,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 md:bottom-6 right-4 lg:right-[340px] z-40 w-12 h-12 rounded-full bg-[#1cb0f6] border-b-4 border-[#1899d6] text-white flex items-center justify-center shadow-lg"
+          className="fixed bottom-20 md:bottom-5 right-3 lg:right-[388px] z-40 w-11 h-11 rounded-full bg-[#1cb0f6] border-b-4 border-[#1899d6] text-white flex items-center justify-center"
           aria-label="Jump to top of learning path"
         >
           <ChevronUp className="w-6 h-6" />

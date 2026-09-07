@@ -11,6 +11,7 @@ import {
   Target,
   Store,
   User,
+  Users,
   LogOut,
 } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
@@ -29,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Quests", href: "/quests", icon: Target, color: "#ce82ff" },
   { label: "Shop", href: "/shop", icon: Store, color: "#ff4b4b" },
   { label: "Profile", href: "/profile", icon: User, color: "#1cb0f6" },
+  { label: "Friends", href: "/friends", icon: Users, color: "#1cb0f6" },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -48,10 +50,10 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       <aside
-        className="hidden md:flex flex-col fixed left-0 top-0 h-dvh w-[216px] border-r-2 border-[#37464f] bg-[#131f24] px-3 pt-5 pb-4 z-40 select-none"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-dvh w-[232px] border-r-2 border-[#37464f] bg-[#131f24] px-2 pt-3 pb-3 z-40 select-none"
         aria-label="Main Navigation"
       >
-        <Link href="/" className="flex items-center gap-2 px-2 py-1 mb-6">
+        <Link href="/" className="flex items-center gap-2 px-2 py-1 mb-3">
           <span className="w-8 h-8 rounded-xl bg-[#58cc02] shadow-[0_3px_0_#46a302] inline-flex items-center justify-center shrink-0">
             <svg
               width="18"
@@ -71,7 +73,7 @@ export const Sidebar: React.FC = () => {
           </span>
         </Link>
 
-        <nav className="flex flex-col gap-1 flex-1">
+        <nav className="flex flex-col gap-0.5 flex-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -88,7 +90,7 @@ export const Sidebar: React.FC = () => {
               >
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-black text-[13px] uppercase tracking-wider ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-xl font-black text-[13px] uppercase tracking-wider ${
                     isActive
                       ? "bg-[#1cb0f6]/12 text-[#1cb0f6] border-2 border-[#1cb0f6]"
                       : "text-white/90 hover:bg-[#1a2c35] border-2 border-transparent"
@@ -112,7 +114,7 @@ export const Sidebar: React.FC = () => {
             id="sidebar-logout-btn"
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-black text-[13px] uppercase tracking-wider text-[#afafaf] hover:bg-[#ff4b4b]/12 hover:text-[#ff4b4b] border-2 border-transparent"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl font-black text-[13px] uppercase tracking-wider text-[#afafaf] hover:bg-[#ff4b4b]/12 hover:text-[#ff4b4b] border-2 border-transparent"
           >
             <LogOut className="w-5 h-5 shrink-0" strokeWidth={2.4} />
             <span>Log out</span>
@@ -121,7 +123,7 @@ export const Sidebar: React.FC = () => {
       </aside>
 
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-[#131f24]/95 backdrop-blur-md border-t-2 border-[#37464f] flex items-center justify-around px-2 z-40 pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 h-[62px] bg-[#131f24]/95 backdrop-blur-md border-t-2 border-[#37464f] flex items-center justify-around px-1 z-40 pb-[env(safe-area-inset-bottom)]"
         aria-label="Mobile Navigation"
       >
         {NAV_ITEMS.map((item) => {
@@ -135,7 +137,7 @@ export const Sidebar: React.FC = () => {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl ${
+              className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-xl ${
                 isActive ? "text-[#1cb0f6]" : "text-[#afafaf]"
               }`}
               aria-label={item.label}

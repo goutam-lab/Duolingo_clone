@@ -30,8 +30,8 @@ export const Mascot: React.FC<MascotProps> = ({
       aria-hidden="true"
     >
       <svg
-        width="110"
-        height="110"
+        width="88"
+        height="88"
         viewBox="0 0 120 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

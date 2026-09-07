@@ -37,29 +37,29 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
 
   const renderIcon = () => {
     if (isLocked) {
-      return <Lock className="w-8 h-8 text-[#677b88]" />;
+      return <Lock className="w-7 h-7 text-[#677b88]" />;
     }
     if (isCompleted) {
-      return <Check className="w-8 h-8 text-white stroke-[3.5]" />;
+      return <Check className="w-7 h-7 text-white stroke-[3.5]" />;
     }
     if (isChest) {
-      return <Gift className="w-8 h-8 text-white stroke-[2.5]" />;
+      return <Gift className="w-7 h-7 text-white stroke-[2.5]" />;
     }
 
     switch (icon_key) {
       case "greetings":
       case "star":
-        return <Star className="w-8 h-8 fill-white text-white" />;
+        return <Star className="w-7 h-7 fill-white text-white" />;
       case "crown":
-        return <Crown className="w-8 h-8 fill-white text-white" />;
+        return <Crown className="w-7 h-7 fill-white text-white" />;
       case "headphones":
-        return <Headphones className="w-8 h-8 text-white stroke-[2.5]" />;
+        return <Headphones className="w-7 h-7 text-white stroke-[2.5]" />;
       case "trophy":
-        return <Trophy className="w-8 h-8 fill-white text-white" />;
+        return <Trophy className="w-7 h-7 fill-white text-white" />;
       case "sparkles":
-        return <Sparkles className="w-8 h-8 text-white" />;
+        return <Sparkles className="w-7 h-7 text-white" />;
       default:
-        return <Star className="w-8 h-8 fill-white text-white" />;
+        return <Star className="w-7 h-7 fill-white text-white" />;
     }
   };
 
@@ -88,42 +88,33 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
     <div
       data-skill-id={skill.id}
       data-skill-status={status}
-      className="relative z-10 flex flex-col items-center select-none w-[132px]"
+      className="relative z-10 flex flex-col items-center select-none w-[88px]"
     >
-      <div className="h-11 w-full flex flex-col items-center justify-end mb-2 relative">
-        {isAvailable && isFirstAvailable && (
-          <motion.div
-            initial={{ y: -4, opacity: 0 }}
-            animate={
-              shouldReduceMotion
-                ? { y: 0, opacity: 1 }
-                : { y: [0, -4, 0], opacity: 1 }
-            }
-            transition={
-              shouldReduceMotion
-                ? { duration: 0 }
-                : { repeat: Infinity, duration: 2, ease: "easeInOut" }
-            }
-            className="absolute -top-7 z-20 bg-[#131f24] text-[#58cc02] font-black text-[11px] uppercase tracking-wider px-3 py-1 rounded-lg shadow-lg border-2 border-[#58cc02] pointer-events-none"
-          >
-            <span>Start</span>
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#131f24] border-r-2 border-b-2 border-[#58cc02] rotate-45" />
-          </motion.div>
-        )}
-        <span
-          className={`px-2 py-0.5 text-[11px] leading-tight font-extrabold text-center line-clamp-2 max-w-[128px] rounded-md bg-[#131f24]/90 ${
-            isLocked ? "text-slate-500" : "text-slate-100"
-          }`}
+      {isAvailable && isFirstAvailable && (
+        <motion.div
+          initial={{ y: -4, opacity: 0 }}
+          animate={
+            shouldReduceMotion
+              ? { y: 0, opacity: 1 }
+              : { y: [0, -3, 0], opacity: 1 }
+          }
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { repeat: Infinity, duration: 2, ease: "easeInOut" }
+          }
+          className="absolute -top-7 z-20 bg-[#131f24] text-[#58cc02] font-black text-[11px] uppercase tracking-wider px-3 py-0.5 rounded-md border-2 border-[#58cc02] pointer-events-none"
         >
-          {title}
-        </span>
-      </div>
+          <span>Start</span>
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#131f24] border-r-2 border-b-2 border-[#58cc02] rotate-45" />
+        </motion.div>
+      )}
 
       <SkillProgressRing
         percentage={progress?.progress_percentage || 0}
         status={status}
-        size={86}
-        strokeWidth={7}
+        size={80}
+        strokeWidth={6}
       >
         <motion.button
           type="button"
@@ -140,7 +131,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
           aria-label={`Skill: ${title}. Status: ${status}. ${
             progress?.lessons_completed || 0
           } of ${progress?.total_lessons || 0} lessons completed.`}
-          className={`w-[70px] h-[70px] rounded-full flex items-center justify-center ${buttonClasses}`}
+          className={`w-[64px] h-[64px] rounded-full flex items-center justify-center ${buttonClasses}`}
         >
           {renderIcon()}
         </motion.button>
@@ -148,7 +139,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({
 
       {isCompleted && (
         <div
-          className="absolute bottom-0 right-4 z-20 bg-[#ffc800] border-2 border-[#131f24] rounded-full p-1 shadow"
+          className="absolute bottom-0 right-1 z-20 bg-[#ffc800] border-2 border-[#131f24] rounded-full p-0.5 shadow"
           title={`Crown Level ${progress?.crown_level || 1}`}
         >
           <Crown className="w-4 h-4 fill-white text-white" />

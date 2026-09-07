@@ -22,13 +22,13 @@ export const DailyGoalCard: React.FC<DailyGoalCardProps> = ({
 
   return (
     <div
-      className={`p-4 rounded-2xl border-2 ${
+      className={`p-3.5 rounded-2xl border-2 ${
         isCompleted
           ? "border-[#58cc02]/55 bg-[#1a2c35]"
           : "border-[#37464f] bg-[#1a2c35]"
       } text-white`}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="font-extrabold text-sm uppercase tracking-wider text-[#afafaf]">
           Daily Quests
         </h3>
