@@ -89,6 +89,20 @@ def reject_friend_request(
 
 
 @router.delete(
+    "/friends/requests/{request_id}",
+    status_code=204,
+    summary="Cancel a pending outgoing friend request",
+)
+def cancel_friend_request(
+    request_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    friendship_service.cancel_request(db, current_user, request_id)
+    return Response(status_code=204)
+
+
+@router.delete(
     "/friends/{user_id}",
     status_code=204,
     summary="Remove an accepted friendship",

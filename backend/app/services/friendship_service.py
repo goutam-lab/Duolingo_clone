@@ -208,5 +208,25 @@ class FriendshipService:
         db.delete(friendship)
         db.commit()
 
+    def cancel_request(self, db: Session, user: User, request_id: int) -> None:
+        friendship = friendship_repository.get_by_id(db, request_id)
+        if not friendship:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Request not found.",
+            )
+        if friendship.requester_id != user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You cannot cancel a request you did not send.",
+            )
+        if friendship.status != "pending":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This request is no longer pending.",
+            )
+        db.delete(friendship)
+        db.commit()
+
 
 friendship_service = FriendshipService()

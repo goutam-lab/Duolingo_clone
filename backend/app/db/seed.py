@@ -13,6 +13,7 @@ from app.models import (
     Skill,
     Lesson,
     Exercise,
+    LessonProgress,
 )
 from app.db.seed_data import (
     USERS_SEED_DATA,
@@ -221,6 +222,46 @@ def seed_course_content(session: Session) -> dict:
     return counts
 
 
+def seed_demo_progress(session: Session) -> int:
+    """Seed completed lesson progress for demo users who have XP."""
+    demo_usernames = ["Alex", "Sam", "Jordan", "Taylor", "Casey"]
+    count = 0
+    lessons = (
+        session.execute(select(Lesson).order_by(Lesson.order_index.asc()).limit(3))
+        .scalars()
+        .all()
+    )
+    if not lessons:
+        return 0
+
+    for uname in demo_usernames:
+        user = session.execute(select(User).where(User.username == uname)).scalar_one_or_none()
+        if not user:
+            continue
+        for lesson in lessons:
+            stmt = select(LessonProgress).where(
+                LessonProgress.user_id == user.id,
+                LessonProgress.lesson_id == lesson.id,
+            )
+            prog = session.execute(stmt).scalar_one_or_none()
+            if not prog:
+                prog = LessonProgress(
+                    user_id=user.id,
+                    lesson_id=lesson.id,
+                    is_completed=True,
+                    attempts_count=1,
+                    best_score=100,
+                )
+                session.add(prog)
+                count += 1
+            else:
+                prog.is_completed = True
+
+    session.flush()
+    logger.info("Seeded %d demo lesson progress records.", count)
+    return count
+
+
 def seed_all(session: Session = None) -> dict:
     """Orchestrate all seed operations within a single atomic transaction."""
     should_close = False
@@ -235,6 +276,7 @@ def seed_all(session: Session = None) -> dict:
         logger.info("Starting database seeding...")
         course_counts = seed_course_content(session)
         users_count = seed_users(session)
+        seed_demo_progress(session)
         ach_count = seed_achievements(session)
 
         session.commit()

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Languages, Trophy, ChevronRight, Medal, Zap } from "lucide-react";
-import { UserMeResponse } from "@/types/api";
+import { UserMeResponse, LeaderboardEntry } from "@/types/api";
+import { apiClient } from "@/lib/api/client";
 import { DailyGoalCard } from "@/components/gamification/DailyGoalCard";
 import { StreakDisplay } from "@/components/gamification/StreakDisplay";
 import { GemsDisplay } from "@/components/gamification/GemsDisplay";
@@ -161,6 +162,23 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const remainingForDisplay = Math.max(0, requiredDisplay - completedLessons);
   const isLeaderboardUnlocked = completedLessons >= requiredDisplay;
 
+  const [topLearners, setTopLearners] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    apiClient
+      .getLeaderboard(3)
+      .then((res) => {
+        if (isMounted && res?.entries) {
+          setTopLearners(res.entries.slice(0, 3));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.total_xp, completedLessons]);
+
   const handleActivateSuperTrial = useCallback(async () => {
     setIsActivatingSuper(true);
     try {
@@ -290,44 +308,59 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             </div>
           </div>
           <div className="space-y-1.5">
-            {[1, 2, 3].map((rank) => (
-              <div
-                key={rank}
-                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl bg-[#131f24]/60"
-              >
-                <div className="w-6 flex items-center justify-center shrink-0">
-                  {rank === 1 ? (
-                    <span className="w-6 h-6 rounded-full bg-[#ffc800] text-[#131f24] flex items-center justify-center font-black text-[11px]">
-                      <Medal className="w-3.5 h-3.5" />
+            {(topLearners.length > 0
+              ? topLearners
+              : [
+                  { rank: 1, username: "Alex", total_xp: 850, user_id: 2 },
+                  { rank: 2, username: "Sam", total_xp: 620, user_id: 3 },
+                  { rank: 3, username: "Jordan", total_xp: 480, user_id: 4 },
+                ]
+            ).map((learner, idx) => {
+              const rank = learner.rank ?? idx + 1;
+              const uname = learner.username;
+              const xpVal = learner.total_xp ?? (learner as any).xp ?? 0;
+              const initials = uname.slice(0, 2).toUpperCase();
+              const isCurrentUser = user && uname.toLowerCase() === user.username.toLowerCase();
+
+              return (
+                <div
+                  key={learner.user_id ?? uname}
+                  className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${
+                    isCurrentUser
+                      ? "bg-[#1cb0f6]/20 border border-[#1cb0f6]/40"
+                      : "bg-[#131f24]/60"
+                  }`}
+                >
+                  <div className="w-6 flex items-center justify-center shrink-0">
+                    {rank === 1 ? (
+                      <span className="w-6 h-6 rounded-full bg-[#ffc800] text-[#131f24] flex items-center justify-center font-black text-[11px]">
+                        <Medal className="w-3.5 h-3.5" />
+                      </span>
+                    ) : rank === 2 ? (
+                      <span className="w-6 h-6 rounded-full bg-slate-300 text-[#131f24] flex items-center justify-center font-black text-[11px]">
+                        <Medal className="w-3.5 h-3.5" />
+                      </span>
+                    ) : (
+                      <span className="w-6 h-6 rounded-full bg-[#cd7f32] text-white flex items-center justify-center font-black text-[11px]">
+                        <Medal className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#243946] border border-[#374c5a] flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                    {initials}
+                  </div>
+                  <div className="text-[12.5px] font-black text-slate-200 flex-1 truncate">
+                    {uname}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Zap className="w-3 h-3 fill-[#ffc800] text-[#ffc800]" />
+                    <span className="text-[12px] font-black text-white">
+                      {xpVal.toLocaleString()}
                     </span>
-                  ) : rank === 2 ? (
-                    <span className="w-6 h-6 rounded-full bg-slate-300 text-[#131f24] flex items-center justify-center font-black text-[11px]">
-                      <Medal className="w-3.5 h-3.5" />
-                    </span>
-                  ) : (
-                    <span className="w-6 h-6 rounded-full bg-[#cd7f32] text-white flex items-center justify-center font-black text-[11px]">
-                      <Medal className="w-3.5 h-3.5" />
-                    </span>
-                  )}
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#243946] border border-[#374c5a] flex items-center justify-center text-[10px] font-black text-white shrink-0">
-                  {rank === 1 ? "DU" : rank === 2 ? "AL" : "EX"}
-                </div>
-                <div className="text-[12.5px] font-black text-slate-200 flex-1 truncate">
-                  {rank === 1
-                    ? "duo_pro"
-                    : rank === 2
-                    ? "alex_learner"
-                    : "excellent99"}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Zap className="w-3 h-3 fill-[#ffc800] text-[#ffc800]" />
-                  <span className="text-[12px] font-black text-white">
-                    {rank === 1 ? "2,480" : rank === 2 ? "1,820" : "1,350"}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Link>
       ) : (

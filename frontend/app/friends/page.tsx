@@ -102,8 +102,16 @@ export default function FriendsPage() {
 
   const handleSend = async (userId: number) => {
     setBusyId(userId);
+    setError(null);
     try {
-      await apiClient.sendFriendRequest(userId);
+      const record = await apiClient.sendFriendRequest(userId);
+      setResults((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? { ...u, friendship_status: "outgoing", friendship_id: record.id }
+            : u
+        )
+      );
       await loadData(false);
       if (query.trim()) {
         const data = await apiClient.searchUsers(query.trim());
@@ -116,11 +124,33 @@ export default function FriendsPage() {
     }
   };
 
+  const handleCancel = async (requestId: number) => {
+    setBusyId(requestId);
+    setError(null);
+    try {
+      await apiClient.cancelFriendRequest(requestId);
+      await loadData(false);
+      if (query.trim()) {
+        const data = await apiClient.searchUsers(query.trim());
+        setResults(data.results);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not cancel request.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const handleAccept = async (requestId: number) => {
     setBusyId(requestId);
+    setError(null);
     try {
       await apiClient.acceptFriendRequest(requestId);
       await loadData(false);
+      if (query.trim()) {
+        const data = await apiClient.searchUsers(query.trim());
+        setResults(data.results);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not accept request.");
     } finally {
@@ -130,9 +160,14 @@ export default function FriendsPage() {
 
   const handleReject = async (requestId: number) => {
     setBusyId(requestId);
+    setError(null);
     try {
       await apiClient.rejectFriendRequest(requestId);
       await loadData(false);
+      if (query.trim()) {
+        const data = await apiClient.searchUsers(query.trim());
+        setResults(data.results);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reject request.");
     } finally {
@@ -142,9 +177,14 @@ export default function FriendsPage() {
 
   const handleUnfriend = async (userId: number) => {
     setBusyId(userId);
+    setError(null);
     try {
       await apiClient.unfriend(userId);
       await loadData(false);
+      if (query.trim()) {
+        const data = await apiClient.searchUsers(query.trim());
+        setResults(data.results);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not unfriend.");
     } finally {
@@ -221,7 +261,11 @@ export default function FriendsPage() {
                     </div>
                     <RelationAction
                       status={hit.friendship_status}
-                      busy={busyId === hit.id || busyId === hit.friendship_id}
+                      busy={Boolean(
+                        busyId !== null &&
+                          (busyId === hit.id ||
+                            (hit.friendship_id != null && busyId === hit.friendship_id))
+                      )}
                       onAdd={() => handleSend(hit.id)}
                       onAccept={() =>
                         hit.friendship_id
@@ -311,7 +355,7 @@ export default function FriendsPage() {
             {requests.outgoing.length > 0 && (
               <section className="rounded-2xl border-2 border-[#37464f] bg-[#1a2c35] overflow-hidden">
                 <h2 className="px-4 py-2 text-[11px] font-black uppercase tracking-wider text-[#afafaf] border-b-2 border-[#37464f]">
-                  Sent requests
+                  Sent requests ({requests.outgoing.length})
                 </h2>
                 {requests.outgoing.map((item) => (
                   <div
@@ -323,8 +367,17 @@ export default function FriendsPage() {
                       <div className="font-black text-sm truncate">
                         {item.user.username}
                       </div>
-                      <div className="text-[11px] text-[#afafaf]">Pending</div>
+                      <div className="text-[11px] text-[#afafaf]">Pending response</div>
                     </div>
+                    <button
+                      type="button"
+                      disabled={busyId === item.id}
+                      onClick={() => handleCancel(item.id)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider text-[#afafaf] hover:text-[#ff4b4b] hover:bg-[#ff4b4b]/10 transition-colors disabled:opacity-50"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      Cancel
+                    </button>
                   </div>
                 ))}
               </section>
@@ -357,14 +410,14 @@ function RelationAction({
 }) {
   if (status === "friends") {
     return (
-      <span className="text-[11px] font-black uppercase tracking-wider text-[#58cc02]">
+      <span className="px-3 py-1 rounded-xl bg-[#58cc02]/15 border border-[#58cc02]/30 text-[11px] font-black uppercase tracking-wider text-[#58cc02]">
         Friends
       </span>
     );
   }
   if (status === "outgoing") {
     return (
-      <span className="text-[11px] font-black uppercase tracking-wider text-[#afafaf]">
+      <span className="px-3 py-1 rounded-xl bg-[#243946] border border-[#374c5a] text-[11px] font-black uppercase tracking-wider text-[#afafaf]">
         Pending
       </span>
     );
@@ -375,9 +428,9 @@ function RelationAction({
         type="button"
         disabled={busy}
         onClick={onAccept}
-        className="px-3 py-1.5 rounded-xl bg-[#58cc02] border-b-4 border-[#46a302] text-[11px] font-black uppercase text-[#131f24]"
+        className="px-3.5 py-1.5 rounded-xl bg-[#58cc02] border-b-4 border-[#46a302] hover:bg-[#4ebb02] active:translate-y-0.5 active:border-b-2 text-[11px] font-black uppercase text-[#131f24] transition-all disabled:opacity-50"
       >
-        Accept
+        {busy ? "Accepting…" : "Accept"}
       </button>
     );
   }
@@ -386,10 +439,10 @@ function RelationAction({
       type="button"
       disabled={busy}
       onClick={onAdd}
-      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1cb0f6] border-b-4 border-[#1899d6] text-[11px] font-black uppercase"
+      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#1cb0f6] border-b-4 border-[#1899d6] hover:bg-[#19a0e0] active:translate-y-0.5 active:border-b-2 text-[11px] font-black uppercase text-white shadow-sm transition-all disabled:opacity-50"
     >
       <UserPlus className="w-3.5 h-3.5" />
-      Add
+      {busy ? "Adding…" : "Add"}
     </button>
   );
 }

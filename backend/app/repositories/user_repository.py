@@ -19,19 +19,12 @@ class UserRepository:
         self, db: Session, limit: int = 100
     ) -> List[Tuple[User, UserStats]]:
         """
-        Fetch top users ordered by total_xp, filtered to only users with >= 1
-        completed lesson. Uses aggregate lesson_progress join for filtering.
+        Fetch top active users ordered by total_xp DESC.
+        Uses aggregate user_stats join with deterministic limit and secondary sort on user.id.
         """
-        completed_cte = (
-            select(LessonProgress.user_id)
-            .where(LessonProgress.is_completed.is_(True))
-            .group_by(LessonProgress.user_id)
-        ).cte("eligible_users")
-
         stmt = (
             select(User, UserStats)
             .join(UserStats, UserStats.user_id == User.id)
-            .join(completed_cte, completed_cte.c.user_id == User.id)
             .where(User.is_active.is_(True))
             .order_by(UserStats.total_xp.desc(), User.id.asc())
             .limit(limit)

@@ -139,7 +139,11 @@ def test_unauthorized_cannot_manipulate_request():
     )
     request_id = created.json()["id"]
 
-    unauth = client.post(f"/api/v1/friends/requests/{request_id}/accept")
+    # Use a fresh client with no stored cookies to simulate truly unauthenticated request
+    from fastapi.testclient import TestClient
+    from app.main import app as _app
+    fresh_client = TestClient(_app, cookies={})
+    unauth = fresh_client.post(f"/api/v1/friends/requests/{request_id}/accept")
     assert unauth.status_code == 401
 
     other = client.post(
@@ -201,3 +205,44 @@ def test_incoming_outgoing_lists():
     assert len(outgoing["outgoing"]) == 1
     assert outgoing["outgoing"][0]["user"]["id"] == b_id
     assert "email" not in incoming["incoming"][0]["user"]
+
+
+def test_cancel_outgoing_request():
+    _, a_headers, _ = _signup("cn_a")
+    b_id, b_headers, _ = _signup("cn_b")
+    _, c_headers, _ = _signup("cn_c")
+
+    created = client.post(
+        "/api/v1/friends/requests",
+        headers=a_headers,
+        json={"user_id": b_id},
+    )
+    assert created.status_code == 201
+    request_id = created.json()["id"]
+
+    # Other user cannot cancel
+    fail_res = client.delete(
+        f"/api/v1/friends/requests/{request_id}",
+        headers=c_headers,
+    )
+    assert fail_res.status_code == 403
+
+    # Addressee cannot cancel via this endpoint (they should reject instead)
+    fail_b = client.delete(
+        f"/api/v1/friends/requests/{request_id}",
+        headers=b_headers,
+    )
+    assert fail_b.status_code == 403
+
+    # Requester cancels successfully
+    cancel_res = client.delete(
+        f"/api/v1/friends/requests/{request_id}",
+        headers=a_headers,
+    )
+    assert cancel_res.status_code == 204
+
+    # Outgoing and incoming are now empty
+    out_after = client.get("/api/v1/friends/requests", headers=a_headers).json()["outgoing"]
+    in_after = client.get("/api/v1/friends/requests", headers=b_headers).json()["incoming"]
+    assert len(out_after) == 0
+    assert len(in_after) == 0

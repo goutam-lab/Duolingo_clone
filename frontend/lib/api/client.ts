@@ -313,6 +313,12 @@ class ApiClient {
     );
   }
 
+  async cancelFriendRequest(requestId: number): Promise<void> {
+    await this.request<void>(`/friends/requests/${requestId}`, {
+      method: "DELETE",
+    });
+  }
+
   async unfriend(userId: number): Promise<void> {
     await this.request<void>(`/friends/${userId}`, { method: "DELETE" });
   }

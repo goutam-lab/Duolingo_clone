@@ -64,7 +64,9 @@ class UserService:
             last_activity_date=stats.last_activity_date,
         )
 
-        aggregates = user_repository.get_profile_stats(db, user.id)
+        # Single targeted count query — avoids loading skill counts and achievements
+        # (which are not needed for /me), keeping total queries <= 3
+        completed_lessons = user_repository.count_completed_lessons(db, user.id)
 
         return UserMeResponse(
             id=user.id,
@@ -79,7 +81,7 @@ class UserService:
             gems=stats.gems,
             daily_goal_xp=stats.daily_goal_xp,
             daily_goal_progress=daily_goal_progress,
-            completed_lessons=aggregates["completed_lessons"],
+            completed_lessons=completed_lessons,
             onboarding_completed=user.onboarding_completed,
             experience_level=user.experience_level,
             selected_course_id=user.selected_course_id,
