@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { LogOut, Users } from "lucide-react";
+import { LogOut, Users, Crown } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { springSnappy } from "@/lib/motion";
+import { SuperDuolingoModal } from "@/components/gamification/SuperDuolingoModal";
 
 interface NavItem {
   label: string;
@@ -166,6 +167,38 @@ export const Sidebar: React.FC = () => {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
   const morePanelRef = useRef<HTMLDivElement | null>(null);
+  const [isSuperOpen, setIsSuperOpen] = useState(false);
+  const [isActivatingSuper, setIsActivatingSuper] = useState(false);
+  const [isSuperActive, setIsSuperActive] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("super_active") === "true";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () =>
+      setIsSuperActive(localStorage.getItem("super_active") === "true");
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
+
+  const handleActivateSuperTrial = async () => {
+    setIsActivatingSuper(true);
+    try {
+      await new Promise((r) => setTimeout(r, 900));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("super_active", "true");
+        localStorage.setItem(
+          "super_expires_at",
+          String(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        );
+      }
+      setIsSuperActive(true);
+      setIsSuperOpen(false);
+    } finally {
+      setIsActivatingSuper(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -350,6 +383,65 @@ export const Sidebar: React.FC = () => {
           })}
         </nav>
 
+        {/* Super Duolingo Promo */}
+        <div className="mt-5 mb-3">
+          <motion.button
+            type="button"
+            onClick={() => setIsSuperOpen(true)}
+            whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+            whileTap={shouldReduceMotion ? undefined : { y: 1 }}
+            className={`w-full relative overflow-hidden rounded-2xl border-2 p-4 text-left transition-all group ${
+              isSuperActive
+                ? "bg-[#5454ff]/18 border-[#7b6bff]/55 hover:border-[#9b8bff]/70"
+                : "bg-[#5454ff]/10 border-[#5454ff]/35 hover:border-[#7b6bff]/60"
+            }`}
+          >
+            <div
+              className="absolute -top-10 -right-8 rounded-full pointer-events-none"
+              style={{
+                width: "160px",
+                height: "160px",
+                background: isSuperActive
+                  ? "radial-gradient(circle, rgba(124,106,255,0.45) 0%, rgba(255,103,156,0.18) 55%, transparent 80%)"
+                  : "radial-gradient(circle, rgba(124,106,255,0.30) 0%, rgba(255,103,156,0.12) 55%, transparent 80%)",
+              }}
+            />
+            <div className="relative flex items-center gap-3">
+              <div
+                className={`shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center ${
+                  isSuperActive
+                    ? "bg-gradient-to-br from-[#7b6bff]/50 to-[#ff628e]/40 border-2 border-[#9b8bff]/60"
+                    : "bg-gradient-to-br from-[#5454ff]/35 to-[#ff628e]/25 border-2 border-[#7b6bff]/50"
+                }`}
+              >
+                <Crown className="w-6 h-6" style={{ fill: "#ffc800", color: "#ffc800" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div
+                  className={`font-black text-[12px] uppercase tracking-[0.12em] leading-none mb-1 ${
+                    isSuperActive ? "[color:#e8dcff]" : "[color:#c7c4ff]"
+                  }`}
+                  style={{
+                    WebkitTextFillColor: isSuperActive ? undefined : "transparent",
+                    backgroundImage: isSuperActive
+                      ? undefined
+                      : "linear-gradient(90deg, #1adfff 0%, #7b6bff 50%, #ff628e 100%)",
+                    WebkitBackgroundClip: isSuperActive ? undefined : "text",
+                    backgroundClip: isSuperActive ? undefined : "text",
+                  }}
+                >
+                  Super Duolingo
+                </div>
+                <div className="text-[11px] font-bold text-white/70 leading-snug line-clamp-2">
+                  {isSuperActive
+                    ? "Enjoy unlimited hearts, no ads, and Legendary!"
+                    : "Try free for 1 week · Cancel anytime"}
+                </div>
+              </div>
+            </div>
+          </motion.button>
+        </div>
+
         {/* Flexible space keeps bottom items anchored below */}
         <div className="flex-1" />
 
@@ -394,6 +486,13 @@ export const Sidebar: React.FC = () => {
           );
         })}
       </nav>
+
+      <SuperDuolingoModal
+        isOpen={isSuperOpen}
+        onClose={() => !isActivatingSuper && setIsSuperOpen(false)}
+        onActivateTrial={handleActivateSuperTrial}
+        isActivating={isActivatingSuper}
+      />
     </>
   );
 };

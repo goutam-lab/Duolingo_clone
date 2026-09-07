@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Languages, Shield, Trophy, Users, Lock } from "lucide-react";
+import { Languages, Trophy, ChevronRight, Medal, Zap } from "lucide-react";
 import { UserMeResponse } from "@/types/api";
 import { DailyGoalCard } from "@/components/gamification/DailyGoalCard";
 import { StreakDisplay } from "@/components/gamification/StreakDisplay";
 import { GemsDisplay } from "@/components/gamification/GemsDisplay";
 import { HeartsDisplay } from "@/components/gamification/HeartsDisplay";
+import { SuperDuolingoModal } from "@/components/gamification/SuperDuolingoModal";
+
+const LEADERBOARD_REQUIREMENT_DISPLAY = 3;
 
 interface RightSidebarProps {
   user: UserMeResponse | null;
@@ -139,12 +142,42 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   onHeartsRefilled,
 }) => {
   const shouldReduceMotion = useReducedMotion();
+  const [isSuperOpen, setIsSuperOpen] = useState(false);
+  const [isActivatingSuper, setIsActivatingSuper] = useState(false);
+  const [isSuperActive, setIsSuperActive] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("super_active") === "true";
+  });
+
   const dailyGoalXp = user?.daily_goal_xp ?? 20;
   const dailyGoalProgress = user?.daily_goal_progress ?? 0;
   const streak = user?.current_streak ?? 0;
   const gems = user?.gems ?? 0;
   const hearts = user?.hearts ?? 0;
   const maxHearts = user?.max_hearts ?? 5;
+  const completedLessons = user?.completed_lessons ?? 0;
+
+  const requiredDisplay = LEADERBOARD_REQUIREMENT_DISPLAY;
+  const remainingForDisplay = Math.max(0, requiredDisplay - completedLessons);
+  const isLeaderboardUnlocked = completedLessons >= requiredDisplay;
+
+  const handleActivateSuperTrial = useCallback(async () => {
+    setIsActivatingSuper(true);
+    try {
+      await new Promise((r) => setTimeout(r, 900));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("super_active", "true");
+        localStorage.setItem(
+          "super_expires_at",
+          String(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        );
+      }
+      setIsSuperActive(true);
+      setIsSuperOpen(false);
+    } finally {
+      setIsActivatingSuper(false);
+    }
+  }, []);
 
   return (
     <aside
@@ -168,63 +201,169 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       </div>
 
       {/* SUPER promotion card */}
-      <motion.div
-        whileHover={shouldReduceMotion ? undefined : { y: -2 }}
-        className="p-4 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] relative overflow-hidden"
-      >
-        {/* Decorative top glow */}
-        <div
-          className="absolute -top-10 -right-6 rounded-full opacity-50 blur-3xl"
+      {isSuperActive ? (
+        <motion.div
+          whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+          className="p-4 rounded-3xl border-2 relative overflow-hidden"
           style={{
-            width: "180px",
-            height: "180px",
+            borderColor: "rgba(124,106,255,0.55)",
             background:
-              "radial-gradient(circle at center, rgba(124,106,255,0.65) 0%, rgba(255,103,156,0.25) 50%, transparent 75%)",
+              "linear-gradient(140deg, rgba(124,106,255,0.22) 0%, rgba(255,103,156,0.18) 100%), #1a2c35",
           }}
-        />
-        <div className="relative flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="mb-2">
-              <SuperBadge />
+        >
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="mb-2">
+                <SuperBadge />
+              </div>
+              <h3 className="text-[17px] font-black text-white leading-snug mb-1 tracking-tight">
+                You have Super!
+              </h3>
+              <p className="text-[12.5px] text-[#cfd8dd] leading-relaxed mb-3 font-semibold">
+                Unlimited hearts, no ads, and all the Legendary you can handle.
+              </p>
+              <Link
+                href="/shop"
+                className="flex items-center justify-center gap-1 w-full py-2.5 px-4 rounded-2xl bg-[#131f24]/40 border-2 border-white/10 hover:bg-[#131f24]/60 active:translate-y-0.5 font-black text-[12px] uppercase tracking-[0.14em] text-white/90 transition"
+              >
+                Manage Super
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-            <h3 className="text-[18px] font-black text-white leading-snug mb-1.5 tracking-tight">
-              Try Super for free
-            </h3>
-            <p className="text-[13px] text-[#cfd8dd] leading-relaxed mb-4 font-semibold">
-              No ads, personalized practice, and unlimited Legendary!
-            </p>
-            <Link
-              href="/shop"
-              className="block text-center w-full py-3 px-4 rounded-2xl bg-[#5454ff] border-b-4 border-[#3b3be6] hover:brightness-110 active:translate-y-0.5 active:border-b-2 font-black text-[13px] uppercase tracking-[0.14em] text-white shadow-[0_6px_0_#2a2ac2] transition"
-            >
-              Try 1 Week Free
-            </Link>
+            <div className="shrink-0 pt-1">
+              <SuperGradientOwl />
+            </div>
           </div>
-          <div className="shrink-0 pt-1">
-            <SuperGradientOwl />
+        </motion.div>
+      ) : (
+        <motion.button
+          type="button"
+          onClick={() => setIsSuperOpen(true)}
+          whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+          className="text-left p-4 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] relative overflow-hidden w-full"
+        >
+          <div
+            className="absolute -top-10 -right-6 rounded-full opacity-50 blur-3xl pointer-events-none"
+            style={{
+              width: "180px",
+              height: "180px",
+              background:
+                "radial-gradient(circle at center, rgba(124,106,255,0.65) 0%, rgba(255,103,156,0.25) 50%, transparent 75%)",
+            }}
+          />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="mb-2">
+                <SuperBadge />
+              </div>
+              <h3 className="text-[18px] font-black text-white leading-snug mb-1.5 tracking-tight">
+                Try Super for free
+              </h3>
+              <p className="text-[13px] text-[#cfd8dd] leading-relaxed mb-4 font-semibold">
+                No ads, personalized practice, and unlimited Legendary!
+              </p>
+              <span className="block text-center w-full py-3 px-4 rounded-2xl bg-[#5454ff] border-b-4 border-[#3b3be6] active:translate-y-0.5 active:border-b-2 font-black text-[13px] uppercase tracking-[0.14em] text-white shadow-[0_6px_0_#2a2ac2] transition">
+                Try 1 Week Free
+              </span>
+            </div>
+            <div className="shrink-0 pt-1">
+              <SuperGradientOwl />
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.button>
+      )}
 
-      {/* Leaderboard unlocks card */}
-      <Link
-        href="/leaderboard"
-        className="block p-5 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group transition"
-      >
-        <h3 className="font-black text-[17px] uppercase tracking-wide text-white leading-snug mb-4">
-          Unlock Leaderboards!
-        </h3>
-        <div className="flex items-center gap-4">
-          <div className="shrink-0">
-            <LeaderboardLockShield />
-          </div>
-          <div>
-            <div className="text-[14px] font-bold text-slate-100 leading-tight">
-              Complete 3 more lessons to start competing
+      {/* Leaderboard card — dynamic: locked or preview */}
+      {isLeaderboardUnlocked ? (
+        <Link
+          href="/leaderboard"
+          className="block p-4 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group transition"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-black text-[17px] uppercase tracking-wide text-white leading-snug flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-[#ffc800]" />
+              Leaderboard
+            </h3>
+            <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#ffc800]">
+              <span>View</span>
+              <ChevronRight className="w-4 h-4" />
             </div>
           </div>
-        </div>
-      </Link>
+          <div className="space-y-1.5">
+            {[1, 2, 3].map((rank) => (
+              <div
+                key={rank}
+                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl bg-[#131f24]/60"
+              >
+                <div className="w-6 flex items-center justify-center shrink-0">
+                  {rank === 1 ? (
+                    <span className="w-6 h-6 rounded-full bg-[#ffc800] text-[#131f24] flex items-center justify-center font-black text-[11px]">
+                      <Medal className="w-3.5 h-3.5" />
+                    </span>
+                  ) : rank === 2 ? (
+                    <span className="w-6 h-6 rounded-full bg-slate-300 text-[#131f24] flex items-center justify-center font-black text-[11px]">
+                      <Medal className="w-3.5 h-3.5" />
+                    </span>
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-[#cd7f32] text-white flex items-center justify-center font-black text-[11px]">
+                      <Medal className="w-3.5 h-3.5" />
+                    </span>
+                  )}
+                </div>
+                <div className="w-8 h-8 rounded-full bg-[#243946] border border-[#374c5a] flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                  {rank === 1 ? "DU" : rank === 2 ? "AL" : "EX"}
+                </div>
+                <div className="text-[12.5px] font-black text-slate-200 flex-1 truncate">
+                  {rank === 1
+                    ? "duo_pro"
+                    : rank === 2
+                    ? "alex_learner"
+                    : "excellent99"}
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Zap className="w-3 h-3 fill-[#ffc800] text-[#ffc800]" />
+                  <span className="text-[12px] font-black text-white">
+                    {rank === 1 ? "2,480" : rank === 2 ? "1,820" : "1,350"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Link>
+      ) : (
+        <Link
+          href="/leaderboard"
+          className="block p-5 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group transition"
+        >
+          <h3 className="font-black text-[17px] uppercase tracking-wide text-white leading-snug mb-4">
+            Unlock Leaderboards!
+          </h3>
+          <div className="flex items-center gap-4">
+            <div className="shrink-0">
+              <LeaderboardLockShield />
+            </div>
+            <div>
+              <div className="text-[14px] font-bold text-slate-100 leading-tight">
+                Complete {remainingForDisplay} more lesson
+                {remainingForDisplay === 1 ? "" : "s"} to start competing
+              </div>
+              {completedLessons > 0 && (
+                <div className="mt-2 h-2 rounded-full bg-[#131f24] overflow-hidden border border-[#2b3d48]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#ffc800] to-[#ffd84d] transition-all"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (completedLessons / requiredDisplay) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </Link>
+      )}
 
       <DailyGoalCard progress={dailyGoalProgress} goal={dailyGoalXp} />
 
@@ -234,6 +373,13 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <span>Terms</span>
         <span>Privacy</span>
       </footer>
+
+      <SuperDuolingoModal
+        isOpen={isSuperOpen}
+        onClose={() => !isActivatingSuper && setIsSuperOpen(false)}
+        onActivateTrial={handleActivateSuperTrial}
+        isActivating={isActivatingSuper}
+      />
     </aside>
   );
 };

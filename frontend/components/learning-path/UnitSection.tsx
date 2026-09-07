@@ -15,7 +15,11 @@ interface UnitSectionProps {
   showHeader?: boolean;
 }
 
-const NODE_Y_OFFSETS = [0, 0, 0, 0, 0, 0, 0, 0];
+const X_OFFSETS = [90, -90, 70, -70, 100, -80, 60, -100, 80, -60];
+
+function getOffset(index: number): number {
+  return X_OFFSETS[index % X_OFFSETS.length];
+}
 
 export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
   function UnitSection(
@@ -62,16 +66,19 @@ export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
           )}
 
           {skills.map((skill, index) => {
-            const currentX = 0;
+            const currentX = getOffset(index);
             const hasNext = index < skills.length - 1;
-            const nextX = 0;
+            const nextX = hasNext ? getOffset(index + 1) : 0;
             const isFirstAvailable = skill.id === firstAvailableSkillId;
-            const mascotOnRight = (index % 2 === 0);
+            const mascotOnRight = currentX >= 0;
 
             return (
               <React.Fragment key={skill.id}>
-                <div className="relative flex justify-center w-full z-10">
-                  <div className="flex flex-col items-center">
+                <div className="relative w-full z-10" style={{ minHeight: "108px" }}>
+                  <div
+                    className="absolute left-1/2 flex flex-col items-center"
+                    style={{ transform: `translateX(calc(-50% + ${currentX}px))` }}
+                  >
                     <SkillNode
                       skill={skill}
                       onClick={onSkillClick}
@@ -82,12 +89,14 @@ export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
 
                   {isFirstAvailable && (
                     <div
-                      className={`absolute hidden sm:block pointer-events-none ${
-                        mascotOnRight
-                          ? "left-[calc(50%+76px)]"
-                          : "right-[calc(50%+76px)]"
-                      }`}
-                      style={{ top: "32px" }}
+                      className={`absolute hidden sm:block pointer-events-none z-20`}
+                      style={{
+                        left: mascotOnRight
+                          ? `calc(50% + ${currentX + 60}px)`
+                          : `calc(50% + ${currentX - 60}px)`,
+                        transform: mascotOnRight ? "none" : "translateX(-100%)",
+                        top: "24px",
+                      }}
                     >
                       <Mascot />
                     </div>
@@ -95,11 +104,11 @@ export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
                 </div>
 
                 {hasNext && (
-                  <div className="relative w-full flex justify-center z-0">
+                  <div className="relative w-full z-0" style={{ height: "56px", marginTop: "-4px" }}>
                     <PathConnector
                       startX={currentX}
                       endX={nextX}
-                      height={52}
+                      height={56}
                       isCompleted={skill.status === "completed"}
                     />
                   </div>

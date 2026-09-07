@@ -29,6 +29,7 @@ export interface UserMeResponse {
   gems: number;
   daily_goal_xp: number;
   daily_goal_progress: number;
+  completed_lessons: number;
   stats?: UserStatsPublic;
 }
 
@@ -211,9 +212,16 @@ export interface LeaderboardEntry {
   xp: number;
 }
 
+export interface LeaderboardUnlockInfo {
+  required_lessons: number;
+  completed_lessons: number;
+  is_unlocked: boolean;
+}
+
 export interface LeaderboardResponse {
   entries: LeaderboardEntry[];
   total_count: number;
+  unlock: LeaderboardUnlockInfo;
 }
 
 export interface ProfileStats {

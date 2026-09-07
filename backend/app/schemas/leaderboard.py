@@ -13,8 +13,15 @@ class LeaderboardEntry(BaseModel):
     xp: int
 
 
+class LeaderboardUnlockInfo(BaseModel):
+    required_lessons: int = 1
+    completed_lessons: int = 0
+    is_unlocked: bool = False
+
+
 class LeaderboardResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     entries: List[LeaderboardEntry]
     total_count: Optional[int] = None
+    unlock: LeaderboardUnlockInfo

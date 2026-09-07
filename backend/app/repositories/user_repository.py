@@ -19,17 +19,32 @@ class UserRepository:
         self, db: Session, limit: int = 100
     ) -> List[Tuple[User, UserStats]]:
         """
-        Fetch top users ordered by total_xp using the ix_user_stats_total_xp index.
-        Applies database-level sorting and pagination.
+        Fetch top users ordered by total_xp, filtered to only users with >= 1
+        completed lesson. Uses aggregate lesson_progress join for filtering.
         """
+        completed_cte = (
+            select(LessonProgress.user_id)
+            .where(LessonProgress.is_completed.is_(True))
+            .group_by(LessonProgress.user_id)
+        ).cte("eligible_users")
+
         stmt = (
             select(User, UserStats)
             .join(UserStats, UserStats.user_id == User.id)
+            .join(completed_cte, completed_cte.c.user_id == User.id)
             .where(User.is_active.is_(True))
             .order_by(UserStats.total_xp.desc(), User.id.asc())
             .limit(limit)
         )
         return db.execute(stmt).all()
+
+    def count_completed_lessons(self, db: Session, user_id: int) -> int:
+        return db.scalar(
+            select(func.count(LessonProgress.id)).where(
+                LessonProgress.user_id == user_id,
+                LessonProgress.is_completed.is_(True),
+            )
+        ) or 0
 
     def get_profile_stats(self, db: Session, user_id: int) -> dict:
         """

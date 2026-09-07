@@ -65,14 +65,21 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
 
     const observerOptions: IntersectionObserverInit = {
       root: null,
-      rootMargin: "-40% 0px -55% 0px",
-      threshold: 0,
+      rootMargin: "-18% 0px -48% 0px",
+      threshold: [0, 0.1, 0.25, 0.5, 0.75],
     };
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       const visibleEntries = entries
         .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        .sort((a, b) => {
+          const aTop = a.boundingClientRect.top;
+          const bTop = b.boundingClientRect.top;
+          if (a.intersectionRatio !== b.intersectionRatio) {
+            return b.intersectionRatio - a.intersectionRatio;
+          }
+          return aTop - bTop;
+        });
 
       if (visibleEntries.length > 0) {
         const unitId = Number(
