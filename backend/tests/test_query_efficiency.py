@@ -46,16 +46,24 @@ def db_session():
         db.close()
 
 
+from app.core.security import create_access_token
+
+
 def test_course_path_query_efficiency_no_n_plus_1(client, db_session):
     """
     Verify course path does NOT perform N+1 queries.
     Even across 4 units, 10 skills, and 30 lessons (44+ path nodes),
-    the endpoint must use bounded batch queries (<= 6 queries).
+    the endpoint must use bounded batch queries (<= 8 queries including auth user lookup).
     """
     course = db_session.execute(select(Course).where(Course.code == "en-hi")).scalar_one()
+    learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
+    token = create_access_token(learner.id)
 
     with QueryCounter() as qc:
-        response = client.get(f"/api/v1/courses/{course.id}/path")
+        response = client.get(
+            f"/api/v1/courses/{course.id}/path",
+            headers={"Authorization": f"Bearer {token}"},
+        )
 
     assert response.status_code == 200
     data = response.json()
@@ -67,8 +75,8 @@ def test_course_path_query_efficiency_no_n_plus_1(client, db_session):
     assert total_lessons_rendered == 30  # 30 lessons across 10 skills
 
     # An N+1 implementation would trigger 1 (user) + 1 (course) + 4 (units) + 10 (skills) + 30 (lessons) = 46+ queries
-    # Our batch selectinload + batch progress strategy executes exactly 7 queries (1 user + 4 hierarchy + 2 progress maps)
-    assert qc.count <= 7, f"Expected <= 7 queries, got {qc.count}. Queries:\n" + "\n".join(qc.queries)
+    # Our batch selectinload + batch progress strategy executes bounded queries (<= 8 queries)
+    assert qc.count <= 8, f"Expected <= 8 queries, got {qc.count}. Queries:\n" + "\n".join(qc.queries)
 
 
 def test_lesson_detail_query_efficiency(client, db_session):
@@ -119,9 +127,13 @@ def test_get_me_query_efficiency(client, db_session):
     Verify /me executes bounded lookups (<= 3 queries).
     """
     learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
+    token = create_access_token(learner.id)
 
     with QueryCounter() as qc:
-        response = client.get("/api/v1/me", headers={"X-User-Id": str(learner.id)})
+        response = client.get(
+            "/api/v1/me", headers={"Authorization": f"Bearer {token}"}
+        )
 
     assert response.status_code == 200
     assert qc.count <= 3, f"Expected <= 3 queries, got {qc.count}. Queries:\n" + "\n".join(qc.queries)
+

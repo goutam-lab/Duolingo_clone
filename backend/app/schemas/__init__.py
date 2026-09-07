@@ -26,6 +26,13 @@ from app.schemas.achievement import (
     AchievementPublic,
     UserAchievementPublic,
 )
+from app.schemas.auth import (
+    UserSignupRequest,
+    UserLoginRequest,
+    OnboardingRequest,
+    UserPublic,
+    AuthResponse,
+)
 
 __all__ = [
     "UserStatsPublic",
@@ -46,4 +53,9 @@ __all__ = [
     "LeaderboardResponse",
     "AchievementPublic",
     "UserAchievementPublic",
+    "UserSignupRequest",
+    "UserLoginRequest",
+    "OnboardingRequest",
+    "UserPublic",
+    "AuthResponse",
 ]

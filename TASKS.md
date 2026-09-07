@@ -96,7 +96,32 @@
 
 ---
 
+# Phase 5.5 - Authentication & Onboarding
+
+- [x] Install and configure bcrypt and pyjwt
+- [x] Implement secure password hashing & constant-time verification
+- [x] Implement dual-transport JWT (HttpOnly session cookie + Bearer token)
+- [x] Update User model with password_hash, onboarding_completed, experience_level, selected_course_id
+- [x] Execute database migration for new authentication and onboarding columns
+- [x] Update database seed orchestrator with hashed passwords and course-first foreign key order
+- [x] Create auth Pydantic schemas (UserSignupRequest, UserLoginRequest, OnboardingRequest, UserPublic, AuthResponse)
+- [x] Implement AuthService with atomic transactional user creation & user_stats initialization
+- [x] Implement authoritative get_current_user dependency, deprecating arbitrary unauthenticated X-User-Id spoofing
+- [x] Implement endpoints: /auth/signup, /auth/login, /auth/logout, /auth/me, /auth/onboarding
+- [x] Implement GET /courses endpoint for onboarding course selection
+- [x] Implement frontend types, credentials: "include", and auth client methods
+- [x] Implement Duolingo-styled /login page with demo credentials shortcut
+- [x] Implement Duolingo-styled /signup page with input validation
+- [x] Implement 3-step interactive /onboarding wizard (Course, Daily Goal, Experience Level)
+- [x] Protect learning path (/) with redirects to /login and /onboarding
+- [x] Add Logout functionality to Sidebar
+- [x] Create comprehensive security test suite in backend/tests/test_auth.py (13 tests)
+- [x] Verify complete test suite (66 tests passed) and frontend build (Turbopack 0 errors)
+
+---
+
 # Phase 6 - Lesson Player
+
 
 - [ ] Create lesson route
 - [ ] Create lesson header

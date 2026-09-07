@@ -1,12 +1,18 @@
 """Deterministic seed definitions for users and user stats."""
 from datetime import date
 
+DEFAULT_DEV_PASSWORD_HASH = "$2b$12$wlgSkVopJBaFgTtiEH1nH.LB/iyIPhO9lOwVWp6.zcNW1jouO0VEC"  # "password123"
+
 USERS_SEED_DATA = [
     {
         "username": "learner",
         "email": "learner@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "default",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "beginner",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 0,
             "current_streak": 0,
@@ -23,8 +29,12 @@ USERS_SEED_DATA = [
     {
         "username": "Alex",
         "email": "alex@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "avatar_1",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "intermediate",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 850,
             "current_streak": 12,
@@ -41,8 +51,12 @@ USERS_SEED_DATA = [
     {
         "username": "Sam",
         "email": "sam@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "avatar_2",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "beginner",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 620,
             "current_streak": 8,
@@ -59,8 +73,12 @@ USERS_SEED_DATA = [
     {
         "username": "Jordan",
         "email": "jordan@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "avatar_3",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "intermediate",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 480,
             "current_streak": 5,
@@ -77,8 +95,12 @@ USERS_SEED_DATA = [
     {
         "username": "Taylor",
         "email": "taylor@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "avatar_4",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "beginner",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 310,
             "current_streak": 3,
@@ -95,8 +117,12 @@ USERS_SEED_DATA = [
     {
         "username": "Casey",
         "email": "casey@example.com",
+        "password_hash": DEFAULT_DEV_PASSWORD_HASH,
         "avatar_key": "avatar_5",
         "is_active": True,
+        "onboarding_completed": True,
+        "experience_level": "beginner",
+        "selected_course_id": 1,
         "stats": {
             "total_xp": 170,
             "current_streak": 2,

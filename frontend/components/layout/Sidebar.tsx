@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Trophy, Target, Store, User, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Trophy, Target, Store, User, Sparkles, LogOut } from "lucide-react";
+import { apiClient } from "@/lib/api/client";
 
 interface NavItem {
   label: string;
@@ -21,6 +22,16 @@ const NAV_ITEMS: NavItem[] = [
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await apiClient.logout();
+    } catch {
+      // Ignored
+    }
+    router.push("/login");
+  };
 
   return (
     <>
@@ -66,7 +77,21 @@ export const Sidebar: React.FC = () => {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="pt-4 border-t-2 border-[#2b3d48]">
+          <button
+            id="sidebar-logout-btn"
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-wider text-slate-400 hover:bg-red-500/15 hover:text-red-400 border-2 border-transparent transition-all duration-100"
+          >
+            <LogOut className="w-6 h-6 stroke-2" />
+            <span>Log out</span>
+          </button>
+        </div>
       </aside>
+
 
       {/* Mobile Bottom Navigation Bar (visible on mobile only) */}
       <nav

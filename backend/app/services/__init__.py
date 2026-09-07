@@ -3,6 +3,7 @@ from app.services.course_path_service import course_path_service, CoursePathServ
 from app.services.lesson_service import lesson_service, LessonService
 from app.services.leaderboard_service import leaderboard_service, LeaderboardService
 from app.services.achievement_service import achievement_service, AchievementService
+from app.services.auth_service import auth_service, AuthService
 
 __all__ = [
     "user_service",
@@ -15,4 +16,7 @@ __all__ = [
     "LeaderboardService",
     "achievement_service",
     "AchievementService",
+    "auth_service",
+    "AuthService",
 ]
+

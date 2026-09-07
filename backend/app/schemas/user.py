@@ -32,6 +32,9 @@ class UserMeResponse(BaseModel):
     gems: int
     daily_goal_xp: int
     daily_goal_progress: int
+    onboarding_completed: bool = False
+    experience_level: Optional[str] = None
+    selected_course_id: Optional[int] = None
     stats: UserStatsPublic
 
 

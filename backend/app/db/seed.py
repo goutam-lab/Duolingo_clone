@@ -37,8 +37,12 @@ def seed_users(session: Session) -> int:
             user = User(
                 username=username,
                 email=user_data["email"],
+                password_hash=user_data.get("password_hash"),
                 avatar_key=user_data["avatar_key"],
                 is_active=user_data["is_active"],
+                onboarding_completed=user_data.get("onboarding_completed", True),
+                experience_level=user_data.get("experience_level", "beginner"),
+                selected_course_id=user_data.get("selected_course_id", 1),
             )
             session.add(user)
             session.flush()  # Generate user.id for 1:1 user_stats
@@ -59,7 +63,16 @@ def seed_users(session: Session) -> int:
             session.add(stats)
             count += 1
         else:
-            # User already exists - ensure user_stats exists
+            # User already exists - update auth fields if missing
+            if not user.password_hash:
+                user.password_hash = user_data.get("password_hash")
+            user.onboarding_completed = user_data.get("onboarding_completed", True)
+            if not user.experience_level:
+                user.experience_level = user_data.get("experience_level", "beginner")
+            if not user.selected_course_id:
+                user.selected_course_id = user_data.get("selected_course_id", 1)
+
+            # Ensure user_stats exists
             if not user.stats:
                 stats = UserStats(
                     user_id=user.id,
@@ -220,9 +233,9 @@ def seed_all(session: Session = None) -> dict:
         create_tables(engine=session.get_bind())
 
         logger.info("Starting database seeding...")
+        course_counts = seed_course_content(session)
         users_count = seed_users(session)
         ach_count = seed_achievements(session)
-        course_counts = seed_course_content(session)
 
         session.commit()
         logger.info("Seeding completed and committed successfully.")
@@ -231,6 +244,7 @@ def seed_all(session: Session = None) -> dict:
             "achievements": ach_count,
             **course_counts,
         }
+
     except Exception as exc:
         session.rollback()
         logger.error("Error during seeding, transaction rolled back: %s", exc)

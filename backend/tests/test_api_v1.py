@@ -12,6 +12,9 @@ from app.models.achievement import Achievement
 from app.models.user_achievement import UserAchievement
 
 
+from app.core.security import create_access_token
+
+
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as c:
@@ -27,11 +30,18 @@ def db_session():
         db.close()
 
 
+@pytest.fixture
+def auth_headers(db_session):
+    learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
+    token = create_access_token(learner.id)
+    return {"Authorization": f"Bearer {token}"}
+
+
 # ---------------------------------------------------------------------------
 # 1. GET /api/v1/me & POST /api/v1/me/refill-hearts
 # ---------------------------------------------------------------------------
-def test_get_me_default_learner(client):
-    response = client.get("/api/v1/me")
+def test_get_me_default_learner(client, auth_headers):
+    response = client.get("/api/v1/me", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["username"] == "learner"
@@ -53,8 +63,9 @@ def test_get_me_with_header_user_switching(client, db_session):
     # Fetch demo user Alex
     alex = db_session.execute(select(User).where(User.username == "Alex")).scalar_one_or_none()
     assert alex is not None
+    token = create_access_token(alex.id)
 
-    response = client.get("/api/v1/me", headers={"X-User-Id": str(alex.id)})
+    response = client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     data = response.json()
     assert data["username"] == "Alex"
@@ -62,13 +73,14 @@ def test_get_me_with_header_user_switching(client, db_session):
 
 
 def test_get_me_nonexistent_user_header(client):
-    response = client.get("/api/v1/me", headers={"X-User-Id": "999999"})
-    assert response.status_code == 404
+    token = create_access_token(999999)
+    response = client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 401
     data = response.json()
     assert "error" in data or "detail" in data
 
 
-def test_me_daily_goal_rollover(client, db_session):
+def test_me_daily_goal_rollover(client, db_session, auth_headers):
     """If daily_goal_date < today, daily_goal_progress should report 0 without database corruption."""
     learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
     stats = learner.stats
@@ -82,7 +94,7 @@ def test_me_daily_goal_rollover(client, db_session):
     db_session.commit()
 
     try:
-        response = client.get("/api/v1/me", headers={"X-User-Id": str(learner.id)})
+        response = client.get("/api/v1/me", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["daily_goal_progress"] == 0
@@ -94,7 +106,7 @@ def test_me_daily_goal_rollover(client, db_session):
         db_session.commit()
 
 
-def test_me_streak_evaluation_expired(client, db_session):
+def test_me_streak_evaluation_expired(client, db_session, auth_headers):
     """If last_activity_date < yesterday, streak evaluates to 0."""
     learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
     stats = learner.stats
@@ -107,7 +119,7 @@ def test_me_streak_evaluation_expired(client, db_session):
     db_session.commit()
 
     try:
-        response = client.get("/api/v1/me", headers={"X-User-Id": str(learner.id)})
+        response = client.get("/api/v1/me", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["current_streak"] == 0
@@ -118,7 +130,7 @@ def test_me_streak_evaluation_expired(client, db_session):
         db_session.commit()
 
 
-def test_post_refill_hearts(client, db_session):
+def test_post_refill_hearts(client, db_session, auth_headers):
     learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
     stats = learner.stats
 
@@ -126,7 +138,7 @@ def test_post_refill_hearts(client, db_session):
     stats.hearts = 1
     db_session.commit()
 
-    response = client.post("/api/v1/me/refill-hearts", headers={"X-User-Id": str(learner.id)})
+    response = client.post("/api/v1/me/refill-hearts", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["hearts"] == stats.max_hearts
@@ -136,10 +148,11 @@ def test_post_refill_hearts(client, db_session):
 # ---------------------------------------------------------------------------
 # 2. GET /api/v1/courses/{course_id}/path
 # ---------------------------------------------------------------------------
-def test_get_course_path_success(client, db_session):
+def test_get_course_path_success(client, db_session, auth_headers):
     course = db_session.execute(select(Course).where(Course.code == "en-hi")).scalar_one()
 
-    response = client.get(f"/api/v1/courses/{course.id}/path")
+    response = client.get(f"/api/v1/courses/{course.id}/path", headers=auth_headers)
+
     assert response.status_code == 200
     data = response.json()
 
@@ -167,8 +180,8 @@ def test_get_course_path_success(client, db_session):
     assert "attempts_count" in first_lesson
 
 
-def test_get_course_path_nonexistent(client):
-    response = client.get("/api/v1/courses/999999/path")
+def test_get_course_path_nonexistent(client, auth_headers):
+    response = client.get("/api/v1/courses/999999/path", headers=auth_headers)
     assert response.status_code == 404
 
 
@@ -293,11 +306,11 @@ def test_get_achievements_catalog(client):
     assert "THREE_DAY_STREAK" in codes
 
 
-def test_get_my_achievements(client, db_session):
+def test_get_my_achievements(client, db_session, auth_headers):
     learner = db_session.execute(select(User).where(User.username == "learner")).scalar_one()
 
     # Initially learner has 0 achievements
-    response = client.get("/api/v1/me/achievements", headers={"X-User-Id": str(learner.id)})
+    response = client.get("/api/v1/me/achievements", headers=auth_headers)
     assert response.status_code == 200
     assert response.json() == []
 
@@ -308,7 +321,7 @@ def test_get_my_achievements(client, db_session):
     db_session.commit()
 
     try:
-        response = client.get("/api/v1/me/achievements", headers={"X-User-Id": str(learner.id)})
+        response = client.get("/api/v1/me/achievements", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -317,3 +330,4 @@ def test_get_my_achievements(client, db_session):
     finally:
         db_session.delete(user_ach)
         db_session.commit()
+

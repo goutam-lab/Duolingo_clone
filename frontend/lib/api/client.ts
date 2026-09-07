@@ -1,13 +1,45 @@
-import { CoursePathResponse, UserMeResponse, HeartRefillResponse } from "@/types/api";
+import {
+  CoursePathResponse,
+  UserMeResponse,
+  HeartRefillResponse,
+  CourseSummary,
+  AuthResponse,
+  UserPublic,
+  UserSignupRequest,
+  UserLoginRequest,
+  OnboardingRequest,
+} from "@/types/api";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
 class ApiClient {
   private baseUrl: string;
+  private token: string | null = null;
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
+    if (typeof window !== "undefined") {
+      this.token = localStorage.getItem("access_token");
+    }
+  }
+
+  setToken(token: string | null) {
+    this.token = token;
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem("access_token", token);
+      } else {
+        localStorage.removeItem("access_token");
+      }
+    }
+  }
+
+  getToken(): string | null {
+    if (!this.token && typeof window !== "undefined") {
+      this.token = localStorage.getItem("access_token");
+    }
+    return this.token;
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -18,10 +50,16 @@ class ApiClient {
       ...(options.headers as Record<string, string>),
     };
 
+    const token = this.getToken();
+    if (token && !headers["Authorization"]) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
+        credentials: "include", // Transmit HttpOnly access_token cookie
         cache: "no-store", // Ensure fresh real-time data for game state
       });
 
@@ -34,7 +72,9 @@ class ApiClient {
         } catch {
           // If response body is not JSON
         }
-        throw new Error(errorMessage);
+        const error = new Error(errorMessage) as Error & { status?: number };
+        error.status = response.status;
+        throw error;
       }
 
       return await response.json();
@@ -44,6 +84,71 @@ class ApiClient {
       }
       throw new Error("An unexpected network error occurred.");
     }
+  }
+
+  /**
+   * Register a new user account.
+   */
+  async signup(payload: UserSignupRequest): Promise<AuthResponse> {
+    const res = await this.request<AuthResponse>("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    if (res.access_token) {
+      this.setToken(res.access_token);
+    }
+    return res;
+  }
+
+  /**
+   * Authenticate with username or email and password.
+   */
+  async login(payload: UserLoginRequest): Promise<AuthResponse> {
+    const res = await this.request<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    if (res.access_token) {
+      this.setToken(res.access_token);
+    }
+    return res;
+  }
+
+  /**
+   * Terminate active session and clear token.
+   */
+  async logout(): Promise<void> {
+    try {
+      await this.request<{ message: string }>("/auth/logout", {
+        method: "POST",
+      });
+    } finally {
+      this.setToken(null);
+    }
+  }
+
+  /**
+   * Get authenticated user profile and onboarding status.
+   */
+  async getAuthMe(): Promise<UserPublic> {
+    return this.request<UserPublic>("/auth/me");
+  }
+
+  /**
+   * Complete user onboarding with course, daily goal, and experience level.
+   */
+  async completeOnboarding(payload: OnboardingRequest): Promise<UserPublic> {
+    return this.request<UserPublic>("/auth/onboarding", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * List all available courses.
+   */
+  async getCourses(): Promise<CourseSummary[]> {
+    return this.request<CourseSummary[]>("/courses");
   }
 
   /**
@@ -71,3 +176,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+

@@ -1,12 +1,28 @@
+from typing import List
 from fastapi import APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
-from app.schemas.course import CoursePathResponse
+from app.models.course import Course
+from app.schemas.course import CoursePathResponse, CourseSummary
 from app.services.course_path_service import course_path_service
 
 router = APIRouter()
+
+
+@router.get(
+    "/courses",
+    response_model=List[CourseSummary],
+    summary="List all available courses",
+)
+def list_courses(db: Session = Depends(get_db)):
+    """Return all active courses available in the application."""
+    courses = db.execute(
+        select(Course).where(Course.is_active.is_(True)).order_by(Course.id)
+    ).scalars().all()
+    return courses
 
 
 @router.get(
@@ -25,3 +41,4 @@ def get_course_path(
     Completely avoids N+1 queries.
     """
     return course_path_service.get_course_path(db, course_id=course_id, user_id=current_user.id)
+

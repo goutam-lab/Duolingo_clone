@@ -77,6 +77,9 @@ class UserService:
             gems=stats.gems,
             daily_goal_xp=stats.daily_goal_xp,
             daily_goal_progress=daily_goal_progress,
+            onboarding_completed=user.onboarding_completed,
+            experience_level=user.experience_level,
+            selected_course_id=user.selected_course_id,
             stats=stats_public,
         )
 

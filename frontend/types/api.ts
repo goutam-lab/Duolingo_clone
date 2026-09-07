@@ -18,6 +18,9 @@ export interface UserMeResponse {
   username: string;
   email: string;
   avatar_key?: string;
+  onboarding_completed?: boolean;
+  experience_level?: string | null;
+  selected_course_id?: number | null;
   total_xp: number;
   current_streak: number;
   longest_streak: number;
@@ -28,6 +31,43 @@ export interface UserMeResponse {
   daily_goal_progress: number;
   stats?: UserStatsPublic;
 }
+
+export interface UserPublic {
+  id: number;
+  username: string;
+  email: string;
+  avatar_key?: string;
+  onboarding_completed: boolean;
+  experience_level?: string | null;
+  selected_course_id?: number | null;
+  is_active: boolean;
+}
+
+export interface AuthResponse {
+  user: UserPublic;
+  access_token: string;
+  token_type: string;
+  onboarding_completed: boolean;
+  message: string;
+}
+
+export interface UserSignupRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface UserLoginRequest {
+  username_or_email: string;
+  password: string;
+}
+
+export interface OnboardingRequest {
+  course_id: number;
+  daily_goal_xp: number;
+  experience_level: "beginner" | "intermediate" | "advanced";
+}
+
 
 export interface LessonPathResponse {
   id: number;

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { CoursePathResponse, UserMeResponse } from "@/types/api";
 import { apiClient } from "@/lib/api/client";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -12,6 +13,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function HomePage() {
+  const router = useRouter();
   const [coursePath, setCoursePath] = useState<CoursePathResponse | null>(null);
   const [user, setUser] = useState<UserMeResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,19 +24,34 @@ export default function HomePage() {
     setError(null);
 
     try {
-      // Parallel fetch for course learning path and user state
-      const [pathData, userData] = await Promise.all([
-        apiClient.getCoursePath(1),
-        apiClient.getCurrentUser().catch((err) => {
-          console.warn("Could not fetch user /me (using default stats):", err);
-          return null;
-        }),
-      ]);
-
-      setCoursePath(pathData);
-      if (userData) {
-        setUser(userData);
+      // 1. Fetch current authenticated user first
+      let userData: UserMeResponse;
+      try {
+        userData = await apiClient.getCurrentUser();
+      } catch (authErr: any) {
+        if (
+          authErr?.status === 401 ||
+          authErr?.message?.toLowerCase().includes("authentication") ||
+          authErr?.message?.toLowerCase().includes("log in")
+        ) {
+          router.push("/login");
+          return;
+        }
+        throw authErr;
       }
+
+      // Check onboarding
+      if (userData.onboarding_completed === false) {
+        router.push("/onboarding");
+        return;
+      }
+
+      setUser(userData);
+
+      // 2. Fetch learning path for user's selected course
+      const activeCourseId = userData.selected_course_id || 1;
+      const pathData = await apiClient.getCoursePath(activeCourseId);
+      setCoursePath(pathData);
     } catch (err) {
       console.error("Failed to load learning path:", err);
       setError(
@@ -45,11 +62,12 @@ export default function HomePage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
 
   const handleHeartsRefilled = (newHearts: number) => {
     if (user) {

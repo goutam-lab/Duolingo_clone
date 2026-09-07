@@ -1,40 +1,84 @@
 from typing import Optional
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
+from app.core.security import decode_access_token
 
 
 def get_current_user(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
-    x_user_id: Optional[int] = Header(default=None, alias="X-User-Id"),
 ) -> User:
     """
-    Centralized current user dependency abstraction.
-    Allows header-based user switching for testing/demonstration,
-    falling back to the default seeded 'learner'.
+    Authoritative user authentication dependency.
+    Extracts JWT from HttpOnly cookie 'access_token' or 'Authorization: Bearer <token>' header.
+    Rejects unauthenticated requests and arbitrary X-User-Id spoofing.
     """
-    if x_user_id is not None:
-        user = db.execute(select(User).where(User.id == x_user_id, User.is_active.is_(True))).scalar_one_or_none()
-        if user:
-            return user
+    token: Optional[str] = None
+
+    # 1. Check HttpOnly cookie
+    if "access_token" in request.cookies:
+        token = request.cookies["access_token"]
+    # 2. Check Authorization header
+    elif authorization:
+        parts = authorization.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+        elif len(parts) == 1:
+            token = parts[0]
+
+    if not token:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with ID {x_user_id} not found.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required. Please log in.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Fallback to the default seeded learner
-    user = db.execute(select(User).where(User.username == "learner", User.is_active.is_(True))).scalar_one_or_none()
-    if user:
-        return user
+    payload = decode_access_token(token)
+    if not payload or "sub" not in payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired authentication token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Fallback to any active user if learner is not yet seeded
-    user = db.execute(select(User).where(User.is_active.is_(True)).order_by(User.id)).scalars().first()
-    if user:
-        return user
+    try:
+        user_id = int(payload["sub"])
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Malformed token payload.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="No active development user found. Please run seed script.",
-    )
+    user = db.execute(
+        select(User).where(User.id == user_id, User.is_active.is_(True))
+    ).scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
+
+
+def get_current_user_optional(
+    request: Request,
+    authorization: Optional[str] = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """
+    Optional authentication dependency for endpoints that support both
+    guest and authenticated users.
+    """
+    try:
+        return get_current_user(request, authorization, db)
+    except HTTPException:
+        return None
+
