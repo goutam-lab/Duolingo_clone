@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api/client";
 import { CourseSummary } from "@/types/api";
-import { Check, ArrowRight, ArrowLeft, Globe, Zap, Compass, Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, Loader2, AlertCircle, Sparkles } from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -29,6 +29,16 @@ export default function OnboardingPage() {
         if (list && list.length > 0) {
           setCourses(list);
           setSelectedCourseId(list[0].id);
+        } else {
+          setCourses([
+            {
+              id: 1,
+              code: "en-hi",
+              title: "English to Hindi",
+              source_language: "English",
+              target_language: "Hindi",
+            },
+          ]);
         }
       } catch {
         // Fallback demo course if API not ready
@@ -109,37 +119,40 @@ export default function OnboardingPage() {
   const progressPercent = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#131f24] text-white flex flex-col justify-between select-none">
       {/* Top Header & Progress */}
-      <header className="max-w-4xl w-full mx-auto px-4 py-6 flex items-center gap-4">
-        {step > 1 && (
+      <header className="max-w-3xl w-full mx-auto px-4 py-6 flex items-center gap-4">
+        {step > 1 ? (
           <button
             type="button"
             onClick={handleBack}
-            className="p-2 text-duo-gray-400 hover:text-duo-gray-600 transition-colors"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-[#1a2c35] transition-colors"
             title="Go back"
+            aria-label="Previous step"
           >
             <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
           </button>
+        ) : (
+          <div className="w-10" />
         )}
 
-        <div className="flex-1 bg-duo-gray-200 h-4 rounded-full overflow-hidden">
+        <div className="flex-1 bg-[#2b3d48] h-4 rounded-full overflow-hidden p-0.5">
           <div
-            className="bg-duo-green h-full rounded-full transition-all duration-300 ease-out"
+            className="bg-[#58cc02] h-full rounded-full transition-all duration-300 ease-out shadow-[0_0_12px_rgba(88,204,2,0.5)]"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
-        <span className="text-xs font-black text-duo-gray-400 uppercase tracking-widest">
-          {step} of 3
+        <span className="text-xs font-black text-slate-400 uppercase tracking-widest min-w-[50px] text-right">
+          Step {step}/3
         </span>
       </header>
 
       {/* Main Form Content */}
       <main className="max-w-xl w-full mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl flex items-start gap-3 text-red-600 text-sm font-bold animate-shake">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-500" />
+          <div className="mb-6 p-4 bg-red-500/15 border-2 border-red-500/40 rounded-2xl flex items-start gap-3 text-red-300 text-sm font-bold">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-400" />
             <span>{error}</span>
           </div>
         )}
@@ -149,17 +162,17 @@ export default function OnboardingPage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">🌍</span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-duo-gray-800">
+              <h1 className="text-2xl sm:text-3xl font-black text-white">
                 What do you want to learn?
               </h1>
             </div>
-            <p className="text-sm font-bold text-duo-gray-400 mb-6">
+            <p className="text-sm font-bold text-slate-400 mb-6">
               Choose your target language course to begin your journey.
             </p>
 
             {loadingCourses ? (
               <div className="py-12 flex justify-center items-center">
-                <Loader2 className="w-8 h-8 text-duo-green animate-spin" />
+                <Loader2 className="w-8 h-8 text-[#58cc02] animate-spin" />
               </div>
             ) : (
               <div className="space-y-3">
@@ -172,19 +185,19 @@ export default function OnboardingPage() {
                       onClick={() => setSelectedCourseId(c.id)}
                       className={`w-full p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${
                         isSelected
-                          ? "border-duo-green bg-duo-green/5 shadow-[0_4px_0_#58cc02]"
-                          : "border-duo-gray-200 hover:border-duo-gray-300 hover:bg-duo-gray-50"
+                          ? "border-[#58cc02] bg-[#58cc02]/15 shadow-[0_4px_0_#58cc02]"
+                          : "border-[#2b3d48] bg-[#1a2c35] hover:border-slate-500 hover:bg-[#223742]"
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-duo-gray-100 rounded-xl flex items-center justify-center text-2xl">
+                        <div className="w-12 h-12 bg-[#2b3d48] rounded-xl flex items-center justify-center text-2xl shadow-sm">
                           🇮🇳
                         </div>
                         <div>
-                          <div className="font-extrabold text-lg text-duo-gray-800">
+                          <div className="font-black text-lg text-white">
                             {c.title}
                           </div>
-                          <div className="text-xs font-bold text-duo-gray-400">
+                          <div className="text-xs font-bold text-slate-400">
                             {c.target_language} • Complete beginners & advanced
                           </div>
                         </div>
@@ -192,8 +205,8 @@ export default function OnboardingPage() {
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                           isSelected
-                            ? "border-duo-green bg-duo-green text-white"
-                            : "border-duo-gray-300"
+                            ? "border-[#58cc02] bg-[#58cc02] text-white"
+                            : "border-slate-500 bg-[#131f24]"
                         }`}
                       >
                         {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
@@ -211,11 +224,11 @@ export default function OnboardingPage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">⚡</span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-duo-gray-800">
+              <h1 className="text-2xl sm:text-3xl font-black text-white">
                 Pick a daily goal
               </h1>
             </div>
-            <p className="text-sm font-bold text-duo-gray-400 mb-6">
+            <p className="text-sm font-bold text-slate-400 mb-6">
               You can always adjust this later in your settings.
             </p>
 
@@ -229,24 +242,24 @@ export default function OnboardingPage() {
                     onClick={() => setDailyGoalXp(opt.xp)}
                     className={`w-full p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${
                       isSelected
-                        ? "border-duo-green bg-duo-green/5 shadow-[0_4px_0_#58cc02]"
-                        : "border-duo-gray-200 hover:border-duo-gray-300 hover:bg-duo-gray-50"
+                        ? "border-[#58cc02] bg-[#58cc02]/15 shadow-[0_4px_0_#58cc02]"
+                        : "border-[#2b3d48] bg-[#1a2c35] hover:border-slate-500 hover:bg-[#223742]"
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-duo-yellow/20 text-duo-yellow flex items-center justify-center font-black text-base">
+                      <div className="w-10 h-10 rounded-xl bg-[#ffc800]/20 border border-[#ffc800]/40 text-[#ffc800] flex items-center justify-center font-black text-base">
                         {opt.xp}
                       </div>
                       <div>
-                        <div className="font-extrabold text-base text-duo-gray-800 flex items-center gap-2">
+                        <div className="font-black text-base text-white flex items-center gap-2">
                           {opt.label}
                           {opt.badge === "Recommended" && (
-                            <span className="px-2 py-0.5 bg-duo-green/15 text-duo-green rounded-full text-[10px] font-black uppercase tracking-wider">
+                            <span className="px-2 py-0.5 bg-[#58cc02]/20 text-[#58cc02] border border-[#58cc02]/40 rounded-full text-[10px] font-black uppercase tracking-wider">
                               Popular
                             </span>
                           )}
                         </div>
-                        <div className="text-xs font-bold text-duo-gray-400">
+                        <div className="text-xs font-bold text-slate-400">
                           {opt.time} • {opt.xp} XP per day
                         </div>
                       </div>
@@ -254,8 +267,8 @@ export default function OnboardingPage() {
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                         isSelected
-                          ? "border-duo-green bg-duo-green text-white"
-                          : "border-duo-gray-300"
+                          ? "border-[#58cc02] bg-[#58cc02] text-white"
+                          : "border-slate-500 bg-[#131f24]"
                       }`}
                     >
                       {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
@@ -272,11 +285,11 @@ export default function OnboardingPage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">🎯</span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-duo-gray-800">
+              <h1 className="text-2xl sm:text-3xl font-black text-white">
                 What is your experience level?
               </h1>
             </div>
-            <p className="text-sm font-bold text-duo-gray-400 mb-6">
+            <p className="text-sm font-bold text-slate-400 mb-6">
               This helps us personalize your journey from day one.
             </p>
 
@@ -290,17 +303,17 @@ export default function OnboardingPage() {
                     onClick={() => setExperienceLevel(opt.level)}
                     className={`w-full p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${
                       isSelected
-                        ? "border-duo-green bg-duo-green/5 shadow-[0_4px_0_#58cc02]"
-                        : "border-duo-gray-200 hover:border-duo-gray-300 hover:bg-duo-gray-50"
+                        ? "border-[#58cc02] bg-[#58cc02]/15 shadow-[0_4px_0_#58cc02]"
+                        : "border-[#2b3d48] bg-[#1a2c35] hover:border-slate-500 hover:bg-[#223742]"
                     }`}
                   >
                     <div className="flex items-start gap-4">
                       <span className="text-3xl mt-0.5">{opt.icon}</span>
                       <div>
-                        <div className="font-extrabold text-base text-duo-gray-800">
+                        <div className="font-black text-base text-white">
                           {opt.title}
                         </div>
-                        <div className="text-xs font-bold text-duo-gray-400 mt-0.5">
+                        <div className="text-xs font-bold text-slate-400 mt-0.5">
                           {opt.desc}
                         </div>
                       </div>
@@ -308,8 +321,8 @@ export default function OnboardingPage() {
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex-shrink-0 ml-3 flex items-center justify-center ${
                         isSelected
-                          ? "border-duo-green bg-duo-green text-white"
-                          : "border-duo-gray-300"
+                          ? "border-[#58cc02] bg-[#58cc02] text-white"
+                          : "border-slate-500 bg-[#131f24]"
                       }`}
                     >
                       {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
@@ -323,14 +336,14 @@ export default function OnboardingPage() {
       </main>
 
       {/* Bottom Sticky Action Bar */}
-      <footer className="border-t-2 border-duo-gray-200 bg-white py-4 px-4">
+      <footer className="border-t-2 border-[#2b3d48] bg-[#131f24] py-4 px-4 sticky bottom-0 z-20">
         <div className="max-w-xl w-full mx-auto">
           <button
             id="onboarding-continue-btn"
             type="button"
             disabled={submitting || loadingCourses}
             onClick={handleNext}
-            className="w-full py-4 bg-duo-green hover:bg-[#52be02] text-white font-extrabold text-base tracking-wider rounded-2xl shadow-[0_4px_0_#46a302] hover:shadow-[0_2px_0_#46a302] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+            className="w-full py-4 bg-[#58cc02] hover:bg-[#61e002] text-white font-black text-base tracking-wider rounded-2xl shadow-[0_4px_0_#46a302] hover:shadow-[0_2px_0_#46a302] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
           >
             {submitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
