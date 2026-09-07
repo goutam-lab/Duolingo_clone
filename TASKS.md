@@ -79,20 +79,20 @@
 
 # Phase 5 - Learning Path
 
-- [ ] Create learning path page
-- [ ] Create unit header
-- [ ] Create skill node
-- [ ] Create progress ring
-- [ ] Create locked node
-- [ ] Create available node
-- [ ] Create completed node
-- [ ] Create reward node
-- [ ] Create SVG curved path
-- [ ] Add mascot component
-- [ ] Connect path to backend
-- [ ] Implement skill unlock state
-- [ ] Add animations
-- [ ] Make responsive
+- [x] Create learning path page
+- [x] Create unit header
+- [x] Create skill node
+- [x] Create progress ring
+- [x] Create locked node
+- [x] Create available node
+- [x] Create completed node
+- [x] Create reward node
+- [x] Create SVG curved path
+- [x] Add mascot component
+- [x] Connect path to backend
+- [x] Implement skill unlock state
+- [x] Add animations
+- [x] Make responsive
 
 ---
 
