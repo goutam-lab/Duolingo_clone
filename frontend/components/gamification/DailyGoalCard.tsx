@@ -49,12 +49,12 @@ export const DailyGoalCard: React.FC<DailyGoalCardProps> = ({
     <div
       className={`p-4 rounded-3xl border-2 ${
         isCompleted
-          ? "border-[#58cc02]/55 bg-[#1a2c35]"
-          : "border-[#37464f] bg-[#1a2c35]"
-      } text-white`}
+          ? "border-[#58cc02]/55 bg-white dark:bg-[#1a2c35]"
+          : "border-slate-200 dark:border-[#37464f] bg-white dark:bg-[#1a2c35]"
+      } text-slate-900 dark:text-white shadow-sm transition-colors`}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-black text-[17px] uppercase tracking-wide text-white">
+        <h3 className="font-black text-[17px] uppercase tracking-wide text-slate-900 dark:text-white">
           Daily Quests
         </h3>
         <Link
@@ -82,10 +82,10 @@ export const DailyGoalCard: React.FC<DailyGoalCardProps> = ({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between text-[14px] font-black mb-2 gap-2">
-            <span className="text-slate-100 truncate">
+            <span className="text-slate-800 dark:text-slate-100 truncate">
               {isCompleted ? "Goal completed" : `Earn ${safeGoal} XP`}
             </span>
-            <span className={isCompleted ? "text-[#58cc02]" : "text-[#afafaf]"}>
+            <span className={isCompleted ? "text-[#58cc02]" : "text-slate-500 dark:text-[#afafaf]"}>
               {safeProgress} / {safeGoal}
             </span>
           </div>
@@ -93,7 +93,7 @@ export const DailyGoalCard: React.FC<DailyGoalCardProps> = ({
           <div className="flex items-center gap-2">
             <div className="relative flex-1 min-w-0">
               <div
-                className="w-full h-6 bg-[#243946] rounded-full overflow-hidden border border-[#1f2d37]"
+                className="w-full h-6 bg-slate-100 dark:bg-[#243946] rounded-full overflow-hidden border border-slate-200 dark:border-[#1f2d37]"
                 role="progressbar"
                 aria-valuenow={safeProgress}
                 aria-valuemin={0}
@@ -119,7 +119,7 @@ export const DailyGoalCard: React.FC<DailyGoalCardProps> = ({
               className={`shrink-0 rounded-xl border-2 -mr-1 ${
                 isCompleted
                   ? "bg-[#ce82ff]/18 border-[#ce82ff]"
-                  : "bg-[#243946] border-[#3a5160]"
+                  : "bg-slate-100 dark:bg-[#243946] border-slate-200 dark:border-[#3a5160]"
               } p-1.5`}
               title={isCompleted ? "Reward unlocked" : "Reward locked"}
             >

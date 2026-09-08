@@ -3,6 +3,7 @@
 import React from "react";
 import { Edit3 } from "lucide-react";
 import { ExercisePublic } from "@/types/api";
+import { AudioSpeakerButton } from "@/components/lesson/AudioSpeakerButton";
 
 interface FillBlankExerciseProps {
   exercise: ExercisePublic;
@@ -19,6 +20,7 @@ export const FillBlankExercise: React.FC<FillBlankExerciseProps> = ({
 }) => {
   const prefix = exercise.question_data?.prefix || "";
   const suffix = exercise.question_data?.suffix || "";
+  const speechSentence = `${prefix} ${suffix}`.trim() || exercise.prompt;
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -28,9 +30,12 @@ export const FillBlankExercise: React.FC<FillBlankExerciseProps> = ({
         <span>Fill in the Blank</span>
       </div>
 
-      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
-        {exercise.prompt}
-      </h2>
+      <div className="flex items-start gap-4">
+        <AudioSpeakerButton text={speechSentence} size="md" className="mt-1 shrink-0" />
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
+          {exercise.prompt}
+        </h2>
+      </div>
 
       {/* Sentence with Inline Input */}
       <div className="p-6 rounded-3xl bg-[#1a2c35] border-2 border-[#2b3d48] flex flex-wrap items-center gap-2 text-xl sm:text-2xl font-bold text-white shadow-sm">

@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ExercisePublic } from "@/types/api";
+import { AudioSpeakerButton } from "@/components/lesson/AudioSpeakerButton";
 
 interface MultipleChoiceExerciseProps {
   exercise: ExercisePublic;
@@ -20,11 +21,19 @@ export const MultipleChoiceExercise: React.FC<MultipleChoiceExerciseProps> = ({
   const shouldReduceMotion = useReducedMotion();
   const options: string[] = exercise.question_data?.options || [];
 
+  // Extract speech target
+  const speechText =
+    exercise.question_data?.source_text ||
+    exercise.prompt.replace(/^Select the correct answer for:?\s*/i, "");
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
-        {exercise.prompt}
-      </h2>
+      <div className="flex items-start gap-4">
+        <AudioSpeakerButton text={speechText} size="md" className="mt-1 shrink-0" />
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
+          {exercise.prompt}
+        </h2>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
         {options.map((option, idx) => {

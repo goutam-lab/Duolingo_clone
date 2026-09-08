@@ -48,7 +48,7 @@ export const SkillPopover: React.FC<SkillPopoverProps> = ({ skill, onClose }) =>
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="w-full max-w-sm rounded-3xl bg-[#1a2c35] border-2 border-[#37464f] p-6 text-white shadow-2xl relative"
+            className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#1a2c35] border-2 border-slate-200 dark:border-[#37464f] p-6 text-slate-900 dark:text-white shadow-2xl relative"
             onClick={(event) => event.stopPropagation()}
             initial={
               shouldReduceMotion
@@ -66,7 +66,7 @@ export const SkillPopover: React.FC<SkillPopoverProps> = ({ skill, onClose }) =>
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-700/50 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
@@ -81,25 +81,25 @@ export const SkillPopover: React.FC<SkillPopoverProps> = ({ skill, onClose }) =>
 
             <h3
               id="skill-popover-title"
-              className="text-xl font-black tracking-tight mb-1"
+              className="text-xl font-black tracking-tight mb-1 text-slate-900 dark:text-white"
             >
               {skill.title}
             </h3>
             {skill.description && (
-              <p className="text-xs text-[#afafaf] mb-4">{skill.description}</p>
+              <p className="text-xs text-slate-600 dark:text-[#afafaf] mb-4">{skill.description}</p>
             )}
 
-            <div className="rounded-2xl bg-[#131f24] border border-[#37464f] p-3.5 mb-5 flex items-center justify-between">
+            <div className="rounded-2xl bg-slate-50 dark:bg-[#131f24] border border-slate-200 dark:border-[#37464f] p-3.5 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <BookOpen className="w-5 h-5 text-[#1cb0f6]" />
                 <div className="text-left">
-                  <div className="text-xs font-bold text-slate-300">
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     Lesson{" "}
                     {(skill.progress?.lessons_completed || 0) +
                       (skill.status === "completed" ? 0 : 1)}{" "}
                     of {skill.progress?.total_lessons || skill.lessons.length}
                   </div>
-                  <div className="text-[11px] text-slate-500 truncate max-w-[170px]">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[170px]">
                     {(skill.lessons.find((lesson) => !lesson.is_completed) ||
                       skill.lessons[0])?.title || "Language practice"}
                   </div>

@@ -57,11 +57,11 @@ export const UnitSection = React.forwardRef<HTMLElement, UnitSectionProps>(
               className="w-full flex items-center gap-3 mb-10 opacity-70"
               aria-hidden="true"
             >
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#37464f] to-[#37464f]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#6b7c86] px-2">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-[#37464f] to-slate-300 dark:to-[#37464f]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-[#6b7c86] px-2">
                 Section {sectionNumber} · Unit {unit.order_index}
               </span>
-              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#37464f] to-[#37464f]" />
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-slate-300 dark:via-[#37464f] to-slate-300 dark:to-[#37464f]" />
             </div>
           )}
 

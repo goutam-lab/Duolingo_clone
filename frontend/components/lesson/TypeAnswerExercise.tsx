@@ -3,6 +3,7 @@
 import React from "react";
 import { Keyboard } from "lucide-react";
 import { ExercisePublic } from "@/types/api";
+import { AudioSpeakerButton } from "@/components/lesson/AudioSpeakerButton";
 
 interface TypeAnswerExerciseProps {
   exercise: ExercisePublic;
@@ -17,6 +18,10 @@ export const TypeAnswerExercise: React.FC<TypeAnswerExerciseProps> = ({
   onAnswerChange,
   disabled,
 }) => {
+  const speechTarget =
+    exercise.question_data?.source_text ||
+    exercise.prompt.replace(/^Type the answer for:?\s*|^Translate:?\s*/i, "");
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Exercise Prompt Title */}
@@ -25,9 +30,12 @@ export const TypeAnswerExercise: React.FC<TypeAnswerExerciseProps> = ({
         <span>Type the Answer</span>
       </div>
 
-      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
-        {exercise.prompt}
-      </h2>
+      <div className="flex items-start gap-4">
+        <AudioSpeakerButton text={speechTarget} size="md" className="mt-1 shrink-0" />
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
+          {exercise.prompt}
+        </h2>
+      </div>
 
       {/* Answer Input Field */}
       <div className="pt-2">

@@ -12,6 +12,8 @@ import { OutOfHeartsModal } from "@/components/lesson/OutOfHeartsModal";
 import { FeedbackDrawer } from "@/components/lesson/FeedbackDrawer";
 import { ExerciseRenderer } from "@/components/lesson/ExerciseRenderer";
 import { LessonComplete } from "@/components/lesson/LessonComplete";
+import { soundEffects } from "@/lib/sound";
+import { getMotivationalCorrectMessage } from "@/lib/motivation";
 
 export default function LessonPage() {
   const params = useParams();
@@ -153,7 +155,16 @@ export default function LessonPage() {
 
       setIsSubmitted(true);
       setIsCorrect(result.is_correct);
-      setFeedbackText(result.feedback);
+
+      if (result.is_correct) {
+        soundEffects.playCorrect();
+        const motivational = getMotivationalCorrectMessage();
+        setFeedbackText(motivational);
+      } else {
+        soundEffects.playIncorrect();
+        setFeedbackText(result.feedback || "Not quite.");
+      }
+
       setHearts(result.hearts_remaining);
 
       if (result.correct_answer) {
@@ -191,6 +202,7 @@ export default function LessonPage() {
   const handleContinue = async () => {
     if (!isSubmitted) return;
 
+    soundEffects.playClick();
     const isLastExercise = currentExerciseIndex >= totalExercises - 1;
 
     if (!isLastExercise) {
@@ -207,6 +219,7 @@ export default function LessonPage() {
       setIsChecking(true);
       try {
         const completeResult = await apiClient.completeLesson(lessonId, attemptId);
+        soundEffects.playComplete();
         setCompletionData(completeResult);
         setIsCompleted(true);
       } catch (err: any) {

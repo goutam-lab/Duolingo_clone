@@ -3,6 +3,7 @@
 import React from "react";
 import { LayoutGrid } from "lucide-react";
 import { ExercisePublic } from "@/types/api";
+import { AudioSpeakerButton } from "@/components/lesson/AudioSpeakerButton";
 
 interface WordBankExerciseProps {
   exercise: ExercisePublic;
@@ -18,6 +19,11 @@ export const WordBankExercise: React.FC<WordBankExerciseProps> = ({
   disabled,
 }) => {
   const words: string[] = exercise.question_data?.words || [];
+
+  // Speech target
+  const speechText =
+    exercise.question_data?.source_text ||
+    exercise.prompt.replace(/^Build the sentence for:?\s*|^Translate:?\s*/i, "");
 
   // Count occurrences of each word in the source bank
   // and handle duplicate words by tracking indexes
@@ -63,9 +69,12 @@ export const WordBankExercise: React.FC<WordBankExerciseProps> = ({
         <span>Build the Sentence</span>
       </div>
 
-      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
-        {exercise.prompt}
-      </h2>
+      <div className="flex items-start gap-4">
+        <AudioSpeakerButton text={speechText} size="md" className="mt-1 shrink-0" />
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight text-left">
+          {exercise.prompt}
+        </h2>
+      </div>
 
       {/* Answer Slots Area */}
       <div className="min-h-[90px] p-3.5 rounded-2xl bg-[#131f24] border-2 border-dashed border-[#2b3d48] flex flex-wrap gap-2.5 items-center transition-colors">

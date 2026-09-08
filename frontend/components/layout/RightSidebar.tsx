@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Languages, Trophy, ChevronRight, Medal, Zap } from "lucide-react";
+import { Languages, Trophy, ChevronRight, Medal, Zap, Sun, Moon } from "lucide-react";
 import { UserMeResponse, LeaderboardEntry } from "@/types/api";
 import { apiClient } from "@/lib/api/client";
 import { DailyGoalCard } from "@/components/gamification/DailyGoalCard";
@@ -11,6 +11,7 @@ import { StreakDisplay } from "@/components/gamification/StreakDisplay";
 import { GemsDisplay } from "@/components/gamification/GemsDisplay";
 import { HeartsDisplay } from "@/components/gamification/HeartsDisplay";
 import { SuperDuolingoModal } from "@/components/gamification/SuperDuolingoModal";
+import { usePreferences } from "@/context/PreferencesContext";
 
 const LEADERBOARD_REQUIREMENT_DISPLAY = 3;
 
@@ -197,12 +198,27 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   }, []);
 
+  const { theme, toggleTheme } = usePreferences();
+
   return (
     <aside
-      className="hidden lg:flex flex-col gap-3 w-[368px] p-3 pt-3 select-none fixed right-0 top-0 h-dvh overflow-y-auto z-30 bg-[#131f24]"
+      className="hidden lg:flex flex-col gap-3 w-[368px] p-3 pt-3 select-none fixed right-0 top-0 h-dvh overflow-y-auto z-30 bg-white dark:bg-[#131f24] border-l border-[#e5e7eb] dark:border-transparent transition-colors"
       aria-label="Companion Sidebar"
     >
       <div className="flex items-center justify-end gap-1">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#131f24] border border-slate-200 dark:border-[#37464f] flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4 text-[#ffc800]" />
+          ) : (
+            <Moon className="w-4 h-4 text-[#1cb0f6]" />
+          )}
+        </button>
         <div
           className="w-8 h-8 rounded-lg bg-[#1cb0f6]/15 border border-[#1cb0f6]/40 flex items-center justify-center"
           title="Current course"
@@ -295,10 +311,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       {isLeaderboardUnlocked ? (
         <Link
           href="/leaderboard"
-          className="block p-4 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group transition"
+          className="block p-4 rounded-3xl border-2 border-[#e5e7eb] dark:border-[#37464f] bg-white dark:bg-[#1a2c35] hover:border-[#ffc800]/50 group transition shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-black text-[17px] uppercase tracking-wide text-white leading-snug flex items-center gap-2">
+            <h3 className="font-black text-[17px] uppercase tracking-wide text-slate-900 dark:text-white leading-snug flex items-center gap-2">
               <Trophy className="w-5 h-5 text-[#ffc800]" />
               Leaderboard
             </h3>
@@ -327,8 +343,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   key={learner.user_id ?? uname}
                   className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${
                     isCurrentUser
-                      ? "bg-[#1cb0f6]/20 border border-[#1cb0f6]/40"
-                      : "bg-[#131f24]/60"
+                      ? "bg-[#1cb0f6]/15 border border-[#1cb0f6]/40"
+                      : "bg-slate-50 dark:bg-[#131f24]/60"
                   }`}
                 >
                   <div className="w-6 flex items-center justify-center shrink-0">
@@ -346,15 +362,15 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-[#243946] border border-[#374c5a] flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-[#243946] border border-slate-300 dark:border-[#374c5a] flex items-center justify-center text-[10px] font-black text-slate-800 dark:text-white shrink-0">
                     {initials}
                   </div>
-                  <div className="text-[12.5px] font-black text-slate-200 flex-1 truncate">
+                  <div className="text-[12.5px] font-black text-slate-800 dark:text-slate-200 flex-1 truncate">
                     {uname}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Zap className="w-3 h-3 fill-[#ffc800] text-[#ffc800]" />
-                    <span className="text-[12px] font-black text-white">
+                    <span className="text-[12px] font-black text-slate-800 dark:text-white">
                       {xpVal.toLocaleString()}
                     </span>
                   </div>
@@ -366,9 +382,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       ) : (
         <Link
           href="/leaderboard"
-          className="block p-5 rounded-3xl border-2 border-[#37464f] bg-[#1a2c35] hover:border-[#ffc800]/50 text-white group transition"
+          className="block p-5 rounded-3xl border-2 border-[#e5e7eb] dark:border-[#37464f] bg-white dark:bg-[#1a2c35] hover:border-[#ffc800]/50 group transition shadow-sm"
         >
-          <h3 className="font-black text-[17px] uppercase tracking-wide text-white leading-snug mb-4">
+          <h3 className="font-black text-[17px] uppercase tracking-wide text-slate-900 dark:text-white leading-snug mb-4">
             Unlock Leaderboards!
           </h3>
           <div className="flex items-center gap-4">
@@ -376,12 +392,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <LeaderboardLockShield />
             </div>
             <div>
-              <div className="text-[14px] font-bold text-slate-100 leading-tight">
+              <div className="text-[14px] font-bold text-slate-700 dark:text-slate-100 leading-tight">
                 Complete {remainingForDisplay} more lesson
                 {remainingForDisplay === 1 ? "" : "s"} to start competing
               </div>
               {completedLessons > 0 && (
-                <div className="mt-2 h-2 rounded-full bg-[#131f24] overflow-hidden border border-[#2b3d48]">
+                <div className="mt-2 h-2 rounded-full bg-slate-200 dark:bg-[#131f24] overflow-hidden border border-slate-300 dark:border-[#2b3d48]">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-[#ffc800] to-[#ffd84d] transition-all"
                     style={{

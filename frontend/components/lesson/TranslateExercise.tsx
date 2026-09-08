@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Languages, Volume2 } from "lucide-react";
+import { Languages } from "lucide-react";
 import { ExercisePublic } from "@/types/api";
+import { AudioSpeakerButton } from "@/components/lesson/AudioSpeakerButton";
 
 interface TranslateExerciseProps {
   exercise: ExercisePublic;
@@ -17,8 +18,12 @@ export const TranslateExercise: React.FC<TranslateExerciseProps> = ({
   onAnswerChange,
   disabled,
 }) => {
-  const sourceText =
-    exercise.question_data?.source_text || exercise.prompt || "";
+  // Extract source text or quoted string from prompt if source_text is not provided
+  let sourceText = exercise.question_data?.source_text;
+  if (!sourceText) {
+    const quotedMatch = exercise.prompt.match(/['"‘“]([^'"’”]+)['"’”]/);
+    sourceText = quotedMatch ? quotedMatch[1] : exercise.prompt;
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -33,16 +38,10 @@ export const TranslateExercise: React.FC<TranslateExerciseProps> = ({
       </h2>
 
       {/* Source Text Speech Bubble */}
-      <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] shadow-sm">
-        <button
-          type="button"
-          className="p-2 rounded-xl bg-[#1cb0f6]/20 border border-[#1cb0f6]/40 text-[#1cb0f6] hover:bg-[#1cb0f6]/30 transition-colors shrink-0 cursor-pointer"
-          aria-label="Listen to audio prompt"
-        >
-          <Volume2 className="w-5 h-5" />
-        </button>
+      <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#1a2c35] border-2 border-[#2b3d48] shadow-sm">
+        <AudioSpeakerButton text={sourceText} size="md" />
 
-        <div className="text-lg sm:text-xl font-bold text-white pt-1">
+        <div className="text-lg sm:text-xl font-bold text-white">
           {sourceText}
         </div>
       </div>

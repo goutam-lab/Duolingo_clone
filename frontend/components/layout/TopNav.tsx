@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Languages, Crown } from "lucide-react";
+import { Languages, Crown, Sun, Moon } from "lucide-react";
 import { UserMeResponse } from "@/types/api";
 import { StreakDisplay } from "@/components/gamification/StreakDisplay";
 import { GemsDisplay } from "@/components/gamification/GemsDisplay";
 import { HeartsDisplay } from "@/components/gamification/HeartsDisplay";
 import { XPDisplay } from "@/components/gamification/XPDisplay";
 import { SuperDuolingoModal } from "@/components/gamification/SuperDuolingoModal";
+import { usePreferences } from "@/context/PreferencesContext";
 
 interface TopNavProps {
   user: UserMeResponse | null;
@@ -20,6 +21,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   onHeartsRefilled,
   courseTitle = "English",
 }) => {
+  const { theme, toggleTheme } = usePreferences();
   const streak = user?.current_streak ?? 0;
   const gems = user?.gems ?? 0;
   const hearts = user?.hearts ?? 0;
@@ -60,16 +62,16 @@ export const TopNav: React.FC<TopNavProps> = ({
 
   return (
     <>
-      <header className="lg:hidden w-full sticky top-0 bg-[#131f24]/92 backdrop-blur-md border-b-2 border-[#37464f] z-30 px-3 py-2">
+      <header className="lg:hidden w-full sticky top-0 bg-white/92 dark:bg-[#131f24]/92 backdrop-blur-md border-b-2 border-slate-200 dark:border-[#37464f] z-30 px-3 py-2 transition-colors">
         <div className="flex items-center justify-between gap-2">
           <div
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-[#1a2c35]"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#1a2c35] transition-colors"
             title={`Active course: ${courseTitle}`}
           >
             <div className="w-7 h-7 rounded-md bg-[#1cb0f6]/20 border border-[#1cb0f6] flex items-center justify-center">
               <Languages className="w-4 h-4 text-[#1cb0f6]" />
             </div>
-            <span className="hidden sm:inline font-bold text-xs text-slate-300 truncate max-w-[140px]">
+            <span className="hidden sm:inline font-bold text-xs text-slate-700 dark:text-slate-300 truncate max-w-[140px]">
               {courseTitle}
             </span>
           </div>
@@ -96,6 +98,19 @@ export const TopNav: React.FC<TopNavProps> = ({
             >
               <Crown className="w-3 h-3" style={{ fill: "#ffc800", color: "#ffc800" }} />
               <span className="hidden xs:inline">{isSuperActive ? "Super" : "Try Super"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 rounded-xl bg-slate-100 dark:bg-[#131f24] border border-slate-200 dark:border-[#37464f] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-[#ffc800]" />
+              ) : (
+                <Moon className="w-4 h-4 text-[#1cb0f6]" />
+              )}
             </button>
             <StreakDisplay streak={streak} />
             <GemsDisplay gems={gems} />

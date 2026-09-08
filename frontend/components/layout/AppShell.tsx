@@ -20,7 +20,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   return (
-    <div className="min-h-screen bg-[#131f24] text-white">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
       <Sidebar />
       <div className="md:ml-[280px] lg:mr-[368px] min-h-screen pb-20 md:pb-4">
         <TopNav

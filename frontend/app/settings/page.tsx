@@ -13,12 +13,18 @@ import {
   ChevronRight,
   Flame,
   Zap,
+  Sun,
+  Moon,
+  Monitor,
+  Palette,
 } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { UserMeResponse } from "@/types/api";
 import { AppShell } from "@/components/layout/AppShell";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { usePreferences } from "@/context/PreferencesContext";
+import { soundEffects } from "@/lib/sound";
 
 interface GoalOption {
   xp: number;
@@ -41,19 +47,22 @@ export default function SettingsPage() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isSavingGoal, setIsSavingGoal] = useState(false);
 
-  // Local preferences
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
-  const [motivationalEnabled, setMotivationalEnabled] = useState(true);
+  // Global preferences hook
+  const {
+    soundEnabled,
+    animationsEnabled,
+    motivationalEnabled,
+    theme,
+    setSoundEnabled,
+    setAnimationsEnabled,
+    setMotivationalEnabled,
+    setTheme,
+  } = usePreferences();
 
-  // Initialize preferences
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSoundEnabled(localStorage.getItem("pref_sound") !== "false");
-      setAnimationsEnabled(localStorage.getItem("pref_animations") !== "false");
-      setMotivationalEnabled(localStorage.getItem("pref_motivation") !== "false");
-    }
-  }, []);
+  const showToast = (msg: string) => {
+    setSaveMessage(msg);
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
 
   const loadUser = useCallback(async () => {
     setIsLoading(true);
@@ -84,12 +93,11 @@ export default function SettingsPage() {
   const handleGoalChange = async (newGoalXp: number) => {
     if (!user || user.daily_goal_xp === newGoalXp || isSavingGoal) return;
     setIsSavingGoal(true);
-    setSaveMessage(null);
     try {
       const updated = await apiClient.updateSettings({ daily_goal_xp: newGoalXp });
       setUser(updated);
-      setSaveMessage("Daily goal updated!");
-      setTimeout(() => setSaveMessage(null), 3000);
+      soundEffects.playCorrect();
+      showToast("Daily goal updated!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update daily goal.");
     } finally {
@@ -97,25 +105,33 @@ export default function SettingsPage() {
     }
   };
 
-  const toggleSound = () => {
+  const handleToggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
-    localStorage.setItem("pref_sound", String(next));
+    showToast(`Sound effects ${next ? "enabled" : "disabled"}`);
   };
 
-  const toggleAnimations = () => {
+  const handleToggleAnimations = () => {
     const next = !animationsEnabled;
     setAnimationsEnabled(next);
-    localStorage.setItem("pref_animations", String(next));
+    soundEffects.playClick();
+    showToast(`Animations ${next ? "enabled" : "disabled"}`);
   };
 
-  const toggleMotivational = () => {
+  const handleToggleMotivational = () => {
     const next = !motivationalEnabled;
     setMotivationalEnabled(next);
-    localStorage.setItem("pref_motivation", String(next));
+    soundEffects.playClick();
+    showToast(`Motivational messages ${next ? "enabled" : "disabled"}`);
+  };
+
+  const handleSelectTheme = (selectedTheme: "dark" | "light") => {
+    setTheme(selectedTheme);
+    showToast(`${selectedTheme === "light" ? "Light" : "Dark"} mode activated`);
   };
 
   const handleLogout = async () => {
+    soundEffects.playClick();
     try {
       await apiClient.logout();
     } catch {
@@ -149,14 +165,14 @@ export default function SettingsPage() {
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-white">Settings</h1>
                 <p className="text-xs text-[#afafaf] font-semibold">
-                  Manage your account, daily learning goals, and preferences.
+                  Manage your account, appearance, and learning preferences.
                 </p>
               </div>
             </header>
 
             {saveMessage && (
-              <div className="flex items-center gap-2 p-3 rounded-2xl bg-[#58cc02]/15 border border-[#58cc02]/40 text-[#58cc02] text-xs font-black uppercase tracking-wider animate-in fade-in">
-                <Check className="w-4 h-4" />
+              <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-[#58cc02]/15 border-2 border-[#58cc02]/40 text-[#58cc02] text-xs font-black uppercase tracking-wider animate-in fade-in">
+                <Check className="w-4 h-4 stroke-[3]" />
                 <span>{saveMessage}</span>
               </div>
             )}
@@ -199,6 +215,67 @@ export default function SettingsPage() {
               </div>
             </section>
 
+            {/* Appearance / Theme Section */}
+            <section
+              aria-label="Appearance Theme"
+              className="p-5 rounded-3xl bg-[#1a2c35] border-2 border-[#37464f] space-y-4"
+            >
+              <div className="flex items-center gap-2.5 text-[#ce82ff] font-black text-xs uppercase tracking-wider">
+                <Palette className="w-4 h-4" />
+                <span>Appearance</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Dark Mode Option */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme("dark")}
+                  className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all cursor-pointer ${
+                    theme === "dark"
+                      ? "bg-[#131f24] border-[#1cb0f6] shadow-md ring-2 ring-[#1cb0f6]/20"
+                      : "bg-[#131f24]/50 border-[#2b3d48] hover:border-slate-500 opacity-70"
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#1a2c35] border border-[#37464f] flex items-center justify-center text-[#1cb0f6]">
+                    <Moon className="w-5 h-5" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-black text-sm text-white flex items-center justify-center gap-1.5">
+                      <span>Dark Theme</span>
+                      {theme === "dark" && <Check className="w-3.5 h-3.5 text-[#1cb0f6] stroke-[3]" />}
+                    </div>
+                    <div className="text-[11px] font-medium text-slate-400 mt-0.5">
+                      Sleek & high contrast
+                    </div>
+                  </div>
+                </button>
+
+                {/* Light Mode Option */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme("light")}
+                  className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all cursor-pointer ${
+                    theme === "light"
+                      ? "bg-[#ffffff] border-[#1cb0f6] shadow-md ring-2 ring-[#1cb0f6]/20"
+                      : "bg-[#131f24]/50 border-[#2b3d48] hover:border-slate-500 opacity-70"
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#ffc800]/15 border border-[#ffc800]/30 flex items-center justify-center text-[#ffc800]">
+                    <Sun className="w-5 h-5" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-black text-sm text-white flex items-center justify-center gap-1.5">
+                      <span>Light Theme</span>
+                      {theme === "light" && <Check className="w-3.5 h-3.5 text-[#1cb0f6] stroke-[3]" />}
+                    </div>
+                    <div className="text-[11px] font-medium text-slate-400 mt-0.5">
+                      Vibrant & daytime friendly
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </section>
+
             {/* Daily Goal Target */}
             <section
               aria-label="Daily Goal"
@@ -223,7 +300,7 @@ export default function SettingsPage() {
                       type="button"
                       disabled={isSavingGoal}
                       onClick={() => handleGoalChange(opt.xp)}
-                      className={`flex items-center justify-between p-3.5 rounded-2xl border-2 text-left transition-all ${
+                      className={`flex items-center justify-between p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
                         isSelected
                           ? "bg-[#1cb0f6]/15 border-[#1cb0f6] shadow-sm"
                           : "bg-[#131f24]/70 border-[#2b3d48] hover:border-[#37464f] hover:bg-[#131f24]"
@@ -264,19 +341,20 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-3">
+                {/* Sound Effects */}
                 <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#131f24]/70 border border-[#2b3d48]">
                   <div>
                     <div className="font-black text-sm text-white">Sound Effects</div>
                     <div className="text-[11px] font-semibold text-[#afafaf]">
-                      Play sounds for correct answers and completions
+                      Play sounds for correct answers, exercises, and completions
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={toggleSound}
+                    onClick={handleToggleSound}
                     role="switch"
                     aria-checked={soundEnabled}
-                    className={`w-12 h-7 rounded-full transition-colors relative p-1 ${
+                    className={`w-12 h-7 rounded-full transition-colors relative p-1 cursor-pointer ${
                       soundEnabled ? "bg-[#58cc02]" : "bg-[#37464f]"
                     }`}
                   >
@@ -288,6 +366,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
+                {/* Animations */}
                 <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#131f24]/70 border border-[#2b3d48]">
                   <div>
                     <div className="font-black text-sm text-white">Animations</div>
@@ -297,10 +376,10 @@ export default function SettingsPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={toggleAnimations}
+                    onClick={handleToggleAnimations}
                     role="switch"
                     aria-checked={animationsEnabled}
-                    className={`w-12 h-7 rounded-full transition-colors relative p-1 ${
+                    className={`w-12 h-7 rounded-full transition-colors relative p-1 cursor-pointer ${
                       animationsEnabled ? "bg-[#58cc02]" : "bg-[#37464f]"
                     }`}
                   >
@@ -312,6 +391,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
+                {/* Motivational Messages */}
                 <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#131f24]/70 border border-[#2b3d48]">
                   <div>
                     <div className="font-black text-sm text-white">Motivational Messages</div>
@@ -321,10 +401,10 @@ export default function SettingsPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={toggleMotivational}
+                    onClick={handleToggleMotivational}
                     role="switch"
                     aria-checked={motivationalEnabled}
-                    className={`w-12 h-7 rounded-full transition-colors relative p-1 ${
+                    className={`w-12 h-7 rounded-full transition-colors relative p-1 cursor-pointer ${
                       motivationalEnabled ? "bg-[#58cc02]" : "bg-[#37464f]"
                     }`}
                   >
@@ -355,8 +435,11 @@ export default function SettingsPage() {
               </div>
               <button
                 type="button"
-                onClick={() => router.push("/shop")}
-                className="shrink-0 flex items-center gap-1 px-4 py-2.5 rounded-2xl bg-[#5454ff] border-b-4 border-[#3b3be6] active:translate-y-0.5 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#4d4dff] transition"
+                onClick={() => {
+                  soundEffects.playClick();
+                  router.push("/shop");
+                }}
+                className="shrink-0 flex items-center gap-1 px-4 py-2.5 rounded-2xl bg-[#5454ff] border-b-4 border-[#3b3be6] active:translate-y-0.5 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#4d4dff] transition cursor-pointer"
               >
                 <span>View</span>
                 <ChevronRight className="w-4 h-4" />
@@ -371,7 +454,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#ff4b4b]/15 border border-[#ff4b4b]/30 text-[#ff4b4b] hover:bg-[#ff4b4b]/25 active:translate-y-0.5 text-xs font-black uppercase tracking-wider transition"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#ff4b4b]/15 border border-[#ff4b4b]/30 text-[#ff4b4b] hover:bg-[#ff4b4b]/25 active:translate-y-0.5 text-xs font-black uppercase tracking-wider transition cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Log out</span>

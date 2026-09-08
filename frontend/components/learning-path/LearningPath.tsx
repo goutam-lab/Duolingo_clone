@@ -59,54 +59,60 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
     []
   );
 
-  // IntersectionObserver for active unit detection
+  // Deterministic scroll detection for active unit
   useEffect(() => {
     if (units.length === 0) return;
 
-    const observerOptions: IntersectionObserverInit = {
-      root: null,
-      rootMargin: "-18% 0px -48% 0px",
-      threshold: [0, 0.1, 0.25, 0.5, 0.75],
+    let ticking = false;
+
+    const updateActiveUnit = () => {
+      // The sticky header sits at top: 0 (or 49px on mobile) and is ~110px tall.
+      // A threshold of 150px detects which unit is actively under or passing the header.
+      const thresholdY = 150;
+
+      let currentActive: UnitPathResponse | null = null;
+
+      for (let i = 0; i < units.length; i++) {
+        const unit = units[i];
+        const el = sectionRefs.current.get(unit.id);
+        if (!el) continue;
+
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= thresholdY && rect.bottom > thresholdY) {
+          currentActive = unit;
+          break;
+        }
+      }
+
+      if (!currentActive) {
+        const firstEl = sectionRefs.current.get(units[0].id);
+        if (firstEl && firstEl.getBoundingClientRect().top > thresholdY) {
+          currentActive = units[0];
+        } else {
+          currentActive = units[units.length - 1];
+        }
+      }
+
+      if (currentActive) {
+        setActiveUnit((prev) => (prev?.id === currentActive!.id ? prev : currentActive));
+      }
+      ticking = false;
     };
 
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      const visibleEntries = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => {
-          const aTop = a.boundingClientRect.top;
-          const bTop = b.boundingClientRect.top;
-          if (a.intersectionRatio !== b.intersectionRatio) {
-            return b.intersectionRatio - a.intersectionRatio;
-          }
-          return aTop - bTop;
-        });
-
-      if (visibleEntries.length > 0) {
-        const unitId = Number(
-          (visibleEntries[0].target as HTMLElement).dataset.unitId
-        );
-        const found = units.find((u) => u.id === unitId);
-        if (found) {
-          setActiveUnit((prev) => (prev?.id === found.id ? prev : found));
-        }
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateActiveUnit);
+        ticking = true;
       }
     };
 
-    const observer = new IntersectionObserver(
-      handleIntersection,
-      observerOptions
-    );
-
-    // Observe all section refs
-    const timer = window.setTimeout(() => {
-      sectionRefs.current.forEach((el) => {
-        if (el) observer.observe(el);
-      });
-    }, 100);
+    updateActiveUnit();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
 
     return () => {
-      window.clearTimeout(timer);
-      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, [units]);
 
@@ -135,19 +141,19 @@ export const LearningPath: React.FC<LearningPathProps> = ({ coursePath }) => {
   }, [firstAvailableSkillId]);
 
   const headerVariants = {
-    hidden: { opacity: 0, y: -8, scale: 0.985 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-    exit: { opacity: 0, y: 8, scale: 0.985 },
+    hidden: { opacity: 0, y: -6 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 6 },
   };
 
   const headerTransition = shouldReduceMotion
     ? { duration: 0 }
-    : { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const };
+    : { duration: 0.18, ease: "easeOut" as const };
 
   return (
-    <div className="w-full flex flex-col items-center pt-3 pb-10 px-2 sm:px-3">
-      {/* Single Contextual Header — Sticky, changes based on active unit */}
-      <div className="w-full max-w-[598px] mx-auto sticky top-[49px] lg:top-0 z-30 pb-5">
+    <div className="w-full flex flex-col items-center pt-1 pb-10 px-2 sm:px-3">
+      {/* Single Contextual Header — Sticky with top padding and backdrop shield */}
+      <div className="w-full max-w-[598px] mx-auto sticky top-[49px] lg:top-0 z-30 pt-2.5 sm:pt-3 pb-2.5 px-1 bg-[var(--background)]/90 backdrop-blur-md transition-colors">
         <AnimatePresence mode="wait">
           {activeUnit && (
             <motion.div

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { LogOut, Users } from "lucide-react";
+import { LogOut, Users, Sun, Moon } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { springSnappy } from "@/lib/motion";
+import { usePreferences } from "@/context/PreferencesContext";
 
 interface NavItem {
   label: string;
@@ -176,6 +177,7 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
+  const { theme, toggleTheme } = usePreferences();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
   const morePanelRef = useRef<HTMLDivElement | null>(null);
@@ -208,7 +210,7 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       <aside
-        className="hidden md:flex flex-col fixed left-0 top-0 h-dvh w-[280px] border-r-2 border-[#37464f] bg-[#131f24] px-4 pt-7 pb-5 z-40 select-none"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-dvh w-[280px] border-r-2 border-[#e5e7eb] dark:border-[#37464f] bg-white dark:bg-[#131f24] px-4 pt-7 pb-5 z-40 select-none transition-colors"
         aria-label="Main Navigation"
       >
         {/* Logo */}
@@ -247,10 +249,10 @@ export const Sidebar: React.FC = () => {
 
             const content = (
               <div
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-black text-[13px] uppercase tracking-wider ${
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-black text-[13px] uppercase tracking-wider transition-colors ${
                   isActive
                     ? "bg-[#1cb0f6]/12 text-[#1cb0f6] border-2 border-[#1cb0f6]"
-                    : "text-white/90 hover:bg-[#1a2c35] border-2 border-transparent"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-white/90 dark:hover:text-white dark:hover:bg-[#1a2c35] border-2 border-transparent"
                 }`}
               >
                 <span className="inline-flex items-center justify-center w-7 shrink-0">
@@ -284,37 +286,58 @@ export const Sidebar: React.FC = () => {
                           animate={{ opacity: 1, y: 0, x: 0 }}
                           exit={{ opacity: 0, y: -4, x: 6 }}
                           transition={springSnappy}
-                          className="absolute left-[272px] top-0 w-[360px] bg-[#1a2c35] border-2 border-[#37464f] rounded-2xl overflow-hidden shadow-2xl z-50"
+                          className="absolute left-[272px] top-0 w-[360px] bg-white dark:bg-[#1a2c35] border-2 border-slate-200 dark:border-[#37464f] rounded-2xl overflow-hidden shadow-2xl z-50 transition-colors"
                         >
                           <div className="flex flex-col">
                             <button
                               role="menuitem"
-                              className="flex items-center gap-4 px-5 py-4 hover:bg-[#131f24] transition-colors text-left"
+                              className="flex items-center gap-4 px-5 py-4 hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors text-left"
                               onClick={() => router.push("/det")}
                             >
                               <DetIcon />
-                              <span className="font-black text-[15px] tracking-wide uppercase text-white">
+                              <span className="font-black text-[15px] tracking-wide uppercase text-slate-800 dark:text-white">
                                 Duolingo English Test
                               </span>
                             </button>
-                            <div className="h-px bg-[#37464f] mx-4" />
+                            <div className="h-px bg-slate-200 dark:bg-[#37464f] mx-4" />
                             <button
                               role="menuitem"
-                              className="flex items-center gap-4 px-5 py-4 hover:bg-[#131f24] transition-colors text-left"
+                              className="flex items-center gap-4 px-5 py-4 hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors text-left"
                               onClick={() => router.push("/schools")}
                             >
                               <GlobeIcon />
-                              <span className="font-black text-[15px] tracking-wide uppercase text-white">
+                              <span className="font-black text-[15px] tracking-wide uppercase text-slate-800 dark:text-white">
                                 Schools
                               </span>
                             </button>
                           </div>
-                          <div className="h-px bg-[#37464f] mx-0" />
-                          <div className="px-5 py-3 flex flex-col gap-0.5 text-[#afafaf] font-bold text-[14px] uppercase tracking-wider">
+                          <div className="h-px bg-slate-200 dark:bg-[#37464f] mx-0" />
+                          <div className="px-5 py-3 flex flex-col gap-0.5 text-slate-600 dark:text-[#afafaf] font-bold text-[14px] uppercase tracking-wider">
                             <button
                               role="menuitem"
                               type="button"
-                              className="text-left hover:text-white px-2 py-2 rounded-xl hover:bg-[#131f24] transition-colors"
+                              className="flex items-center justify-between text-left hover:text-slate-950 dark:hover:text-white px-2 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors cursor-pointer"
+                              onClick={toggleTheme}
+                            >
+                              <span>Theme</span>
+                              <span className="flex items-center gap-1.5 text-xs font-black lowercase text-[#1cb0f6] bg-[#1cb0f6]/15 px-2 py-0.5 rounded-lg">
+                                {theme === "dark" ? (
+                                  <>
+                                    <Moon className="w-3.5 h-3.5" />
+                                    <span>Dark</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Sun className="w-3.5 h-3.5 text-[#ffc800]" />
+                                    <span>Light</span>
+                                  </>
+                                )}
+                              </span>
+                            </button>
+                            <button
+                              role="menuitem"
+                              type="button"
+                              className="text-left hover:text-slate-950 dark:hover:text-white px-2 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors"
                               onClick={() => router.push("/settings")}
                             >
                               Settings
@@ -322,7 +345,7 @@ export const Sidebar: React.FC = () => {
                             <button
                               role="menuitem"
                               type="button"
-                              className="text-left hover:text-white px-2 py-2 rounded-xl hover:bg-[#131f24] transition-colors"
+                              className="text-left hover:text-slate-950 dark:hover:text-white px-2 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors"
                               onClick={() => router.push("/help")}
                             >
                               Help
@@ -330,7 +353,7 @@ export const Sidebar: React.FC = () => {
                             <button
                               role="menuitem"
                               type="button"
-                              className="text-left hover:text-[#ff4b4b] px-2 py-2 rounded-xl hover:bg-[#131f24] transition-colors"
+                              className="text-left hover:text-[#ff4b4b] px-2 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-[#131f24] transition-colors"
                               onClick={handleLogout}
                             >
                               Log out
@@ -382,7 +405,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Mobile bottom navigation */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 h-[62px] bg-[#131f24]/95 backdrop-blur-md border-t-2 border-[#37464f] flex items-center justify-around px-1 z-40 pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 h-[62px] bg-white/95 dark:bg-[#131f24]/95 backdrop-blur-md border-t-2 border-[#e5e7eb] dark:border-[#37464f] flex items-center justify-around px-1 z-40 pb-[env(safe-area-inset-bottom)] transition-colors"
         aria-label="Mobile Navigation"
       >
         {NAV_ITEMS.slice(0, 5).concat(NAV_ITEMS.filter(n => n.label === "Profile")).map((item) => {
@@ -397,7 +420,7 @@ export const Sidebar: React.FC = () => {
               key={item.label}
               href={item.href}
               className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] rounded-xl ${
-                isActive ? "text-[#1cb0f6]" : "text-[#afafaf]"
+                isActive ? "text-[#1cb0f6]" : "text-slate-500 dark:text-[#afafaf]"
               }`}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}

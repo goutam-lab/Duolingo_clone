@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-duo-green: #58cc02;
   --color-duo-green-dark: #46a302;
@@ -48,11 +50,25 @@
   --radius-button: 16px;
 }
 
+html.light,
+[data-theme="light"] {
+  --background: #f7f9fa;
+  --foreground: #18222b;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --border-subtle: #e5e7eb;
+  --text-muted: #64748b;
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-popover: 0 10px 28px rgba(0, 0, 0, 0.12);
+  color-scheme: light;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .font-display {
@@ -96,6 +112,111 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #4b616c;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Light Theme Dynamic Styling
+   ───────────────────────────────────────────────────────────────────────────── */
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Page Backgrounds & Shell */
+html.light .bg-\[\#131f24\],
+html.light .bg-duo-dark-bg {
+  background-color: #f7f9fa !important;
+}
+
+html.light .bg-\[\#131f24\]\/92,
+html.light .bg-\[\#131f24\]\/95,
+html.light .bg-\[\#131f24\]\/90 {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+}
+
+/* Cards & Elevated Containers */
+html.light .bg-\[\#1a2c35\],
+html.light .bg-duo-dark-card {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* Secondary Panels / Inner Card Rows */
+html.light .bg-\[\#131f24\]\/70,
+html.light .bg-\[\#131f24\]\/50,
+html.light .bg-\[\#1a2735\],
+html.light .bg-\[\#202e35\]\/30,
+html.light .bg-\[\#243946\] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .bg-\[\#203642\] {
+  background-color: #e2e8f0 !important;
+}
+
+/* Borders */
+html.light .border-\[\#37464f\],
+html.light .border-\[\#2b3d48\],
+html.light .border-\[\#374c5a\],
+html.light .border-duo-dark-border {
+  border-color: #e5e7eb !important;
+}
+
+html.light .border-\[\#1d272c\] {
+  border-color: #d1d5db !important;
+}
+
+/* Typography on Light Backgrounds */
+html.light .text-white:not(button[class*="bg-"] *):not(button[class*="bg-"]):not(.keep-white):not([class*="bg-[#58cc02]"] *):not([class*="bg-[#1cb0f6]"] *):not([class*="bg-[#ff4b4b]"] *):not([class*="bg-[#ff9600]"] *):not([class*="bg-[#ce82ff]"] *):not([class*="bg-[#5454ff]"] *),
+html.light [class*="text-white\/"]:not(button[class*="bg-"] *):not(button[class*="bg-"]):not(.keep-white):not([class*="bg-[#58cc02]"] *):not([class*="bg-[#1cb0f6]"] *):not([class*="bg-[#ff4b4b]"] *):not([class*="bg-[#ff9600]"] *):not([class*="bg-[#ce82ff]"] *):not([class*="bg-[#5454ff]"] *),
+html.light .text-slate-100:not(button[class*="bg-"] *):not(.keep-white),
+html.light .text-slate-200:not(button[class*="bg-"] *):not(.keep-white) {
+  color: #18222b !important;
+}
+
+html.light .text-slate-300:not(button[class*="bg-"] *):not(.keep-white),
+html.light .text-slate-400:not(button[class*="bg-"] *):not(.keep-white),
+html.light .text-\[\#afafaf\]:not(button[class*="bg-"] *):not(.keep-white),
+html.light .text-\[\#cfd8dd\]:not(button[class*="bg-"] *):not(.keep-white) {
+  color: #475569 !important;
+}
+
+/* Textareas & Inputs */
+html.light textarea,
+html.light input[type="text"],
+html.light input[type="password"],
+html.light input[type="email"] {
+  background-color: #ffffff !important;
+  color: #18222b !important;
+  border-color: #d1d5db !important;
+}
+
+html.light textarea::placeholder,
+html.light input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Ensure Colored Action Buttons always keep pure white text */
+html.light button[class*="bg-[#58cc02]"],
+html.light button[class*="bg-[#1cb0f6]"],
+html.light button[class*="bg-[#ff4b4b]"],
+html.light button[class*="bg-[#5454ff]"],
+html.light button[class*="bg-[#ff9600]"],
+html.light button[class*="bg-[#58cc02]"] *,
+html.light button[class*="bg-[#1cb0f6]"] *,
+html.light button[class*="bg-[#ff4b4b]"] *,
+html.light button[class*="bg-[#5454ff]"] *,
+html.light button[class*="bg-[#ff9600]"] *,
+html.light .keep-white {
+  color: #ffffff !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
